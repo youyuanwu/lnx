@@ -1,0 +1,6 @@
+{
+  "rust-analyzer.linkedProjects": [
+    "kmods/rust_out_of_tree/rust-project.json",
+    "kmods/rust_misc_device/rust-project.json",
+  ]
+}
