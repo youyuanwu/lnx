@@ -11,13 +11,11 @@ const TX_RING_SIZE: usize = 256;
 const RX_RING_SIZE: usize = 256;
 const MBUF_SIZE: usize = 2048;
 
-const alloc_tx_ring_pages: usize =
-    ((TX_RING_SIZE * size_of::<TxDesc>()) + (PAGE_SIZE - 1)) / PAGE_SIZE;
-const alloc_rx_ring_pages: usize =
-    ((RX_RING_SIZE * size_of::<RxDesc>()) + (PAGE_SIZE - 1)) / PAGE_SIZE;
+const ALLOC_TX_RING_PAGES: usize = (TX_RING_SIZE * size_of::<TxDesc>()).div_ceil(PAGE_SIZE);
+const ALLOC_RX_RING_PAGES: usize = (RX_RING_SIZE * size_of::<RxDesc>()).div_ceil(PAGE_SIZE);
 
-const alloc_tx_buffer_pages: usize = ((TX_RING_SIZE * MBUF_SIZE) + (PAGE_SIZE - 1)) / PAGE_SIZE;
-const alloc_rx_buffer_pages: usize = ((RX_RING_SIZE * MBUF_SIZE) + (PAGE_SIZE - 1)) / PAGE_SIZE;
+const ALLOC_TX_BUFFER_PAGES: usize = (TX_RING_SIZE * MBUF_SIZE).div_ceil(PAGE_SIZE);
+const ALLOC_RX_BUFFER_PAGES: usize = (RX_RING_SIZE * MBUF_SIZE).div_ceil(PAGE_SIZE);
 
 /// Kernel functions that drivers must use
 pub trait KernelFunc {
@@ -79,13 +77,13 @@ pub struct RxDesc {
     special: u16,
 }
 
-impl<'a, K: KernelFunc> E1000Device<'a, K> {
+impl<K: KernelFunc> E1000Device<'_, K> {
     /// New an e1000 device by Allocating memory
     pub fn new(mut kfn: K, mapped_regs: usize) -> Result<Self, i32> {
         info!("New E1000 device @ {:#x}", mapped_regs);
         // 分配的ring内存空间需要16字节对齐
-        let (tx_ring_vaddr, tx_ring_dma) = kfn.dma_alloc_coherent(alloc_tx_ring_pages);
-        let (rx_ring_vaddr, rx_ring_dma) = kfn.dma_alloc_coherent(alloc_rx_ring_pages);
+        let (tx_ring_vaddr, tx_ring_dma) = kfn.dma_alloc_coherent(ALLOC_TX_RING_PAGES);
+        let (rx_ring_vaddr, rx_ring_dma) = kfn.dma_alloc_coherent(ALLOC_RX_RING_PAGES);
 
         let tx_ring = unsafe { from_raw_parts_mut(tx_ring_vaddr as *mut TxDesc, TX_RING_SIZE) };
         let rx_ring = unsafe { from_raw_parts_mut(rx_ring_vaddr as *mut RxDesc, RX_RING_SIZE) };
@@ -112,11 +110,11 @@ impl<'a, K: KernelFunc> E1000Device<'a, K> {
         let mut rx_mbufs = Vec::with_capacity(rx_ring.len());
 
         // 一起申请所有TX内存
-        let (mut tx_mbufs_vaddr, mut tx_mbufs_dma) = kfn.dma_alloc_coherent(alloc_tx_buffer_pages);
+        let (mut tx_mbufs_vaddr, mut tx_mbufs_dma) = kfn.dma_alloc_coherent(ALLOC_TX_BUFFER_PAGES);
 
-        for i in 0..TX_RING_SIZE {
-            tx_ring[i].status = E1000_TXD_STAT_DD as u8;
-            tx_ring[i].addr = tx_mbufs_dma as u64;
+        for item in tx_ring.iter_mut().take(TX_RING_SIZE) {
+            item.status = E1000_TXD_STAT_DD as u8;
+            item.addr = tx_mbufs_dma as u64;
             tx_mbufs.push(tx_mbufs_vaddr);
             tx_mbufs_dma += MBUF_SIZE;
             tx_mbufs_vaddr += MBUF_SIZE;
@@ -124,13 +122,13 @@ impl<'a, K: KernelFunc> E1000Device<'a, K> {
 
         // 一起申请所有RX内存
         //let mut rx_mbufs_dma: usize = K::dma_alloc_coherent(alloc_rx_buffer_pages);
-        let (mut rx_mbufs_vaddr, mut rx_mbufs_dma) = kfn.dma_alloc_coherent(alloc_rx_buffer_pages);
+        let (mut rx_mbufs_vaddr, mut rx_mbufs_dma) = kfn.dma_alloc_coherent(ALLOC_RX_BUFFER_PAGES);
         if rx_mbufs_vaddr == 0 {
             panic!("e1000, alloc dma rx buffer failed");
         }
 
-        for i in 0..RX_RING_SIZE {
-            rx_ring[i].addr = rx_mbufs_dma as u64;
+        for item in rx_ring.iter_mut().take(RX_RING_SIZE) {
+            item.addr = rx_mbufs_dma as u64;
             rx_mbufs.push(rx_mbufs_vaddr);
             rx_mbufs_dma += MBUF_SIZE;
             rx_mbufs_vaddr += MBUF_SIZE;
@@ -196,7 +194,7 @@ impl<'a, K: KernelFunc> E1000Device<'a, K> {
         fence_w();
 
         // [E1000 14.5] Transmit initialization
-        if (self.tx_ring.len() * size_of::<TxDesc>()) % 128 != 0 {
+        if (core::mem::size_of_val(self.tx_ring)) % 128 != 0 {
             //panic("e1000");
             error!("e1000, size of tx_ring is invalid");
         }
@@ -212,14 +210,14 @@ impl<'a, K: KernelFunc> E1000Device<'a, K> {
 
         self.regs[E1000_TDBAL].write(self.tx_ring_dma as u32);
         self.regs[E1000_TDBAH].write((self.tx_ring_dma >> 32) as u32);
-        self.regs[E1000_TDLEN].write((self.tx_ring.len() * size_of::<TxDesc>()) as u32);
+        self.regs[E1000_TDLEN].write((core::mem::size_of_val(self.tx_ring)) as u32);
 
         self.regs[E1000_TDT].write(0); // TX Desc Tail
         self.regs[E1000_TDH].write(0); // TX Desc Head
 
         // [E1000 14.4] Receive initialization
         info!("rx ring 0: {:x?}", self.rx_ring[0]);
-        if (self.rx_ring.len() * size_of::<RxDesc>()) % 128 != 0 {
+        if (core::mem::size_of_val(self.rx_ring)) % 128 != 0 {
             error!("e1000, size of rx_ring is invalid");
         }
 
@@ -242,7 +240,7 @@ impl<'a, K: KernelFunc> E1000Device<'a, K> {
 
         self.regs[E1000_RDBAL].write(self.rx_ring_dma as u32);
         self.regs[E1000_RDBAH].write((self.rx_ring_dma >> 32) as u32);
-        self.regs[E1000_RDLEN].write((self.rx_ring.len() * size_of::<RxDesc>()) as u32);
+        self.regs[E1000_RDLEN].write(core::mem::size_of_val(self.rx_ring) as u32);
 
         self.regs[E1000_RDH].write(0);
         self.regs[E1000_RDT].write((RX_RING_SIZE - 1) as u32);
@@ -356,7 +354,7 @@ impl<'a, K: KernelFunc> E1000Device<'a, K> {
         }
         info!("e1000_recv\n\r");
 
-        if recv_packets.len() > 0 {
+        if recv_packets.is_empty() {
             Some(recv_packets)
         } else {
             None
@@ -427,16 +425,16 @@ pub fn net_rx(packet: &mut [u8]) {
       */
 }
 
-impl<'a, K: KernelFunc> Drop for E1000Device<'a, K> {
+impl<K: KernelFunc> Drop for E1000Device<'_, K> {
     fn drop(&mut self) {
         debug!("Drop DMA memory");
         self.kfn
-            .dma_free_coherent(self.tx_ring.as_ptr() as usize, alloc_tx_ring_pages);
+            .dma_free_coherent(self.tx_ring.as_ptr() as usize, ALLOC_TX_RING_PAGES);
         self.kfn
-            .dma_free_coherent(self.rx_ring.as_ptr() as usize, alloc_rx_ring_pages);
+            .dma_free_coherent(self.rx_ring.as_ptr() as usize, ALLOC_RX_RING_PAGES);
         self.kfn
-            .dma_free_coherent(self.tx_mbufs[0], alloc_tx_buffer_pages);
+            .dma_free_coherent(self.tx_mbufs[0], ALLOC_TX_BUFFER_PAGES);
         self.kfn
-            .dma_free_coherent(self.rx_mbufs[0], alloc_rx_buffer_pages);
+            .dma_free_coherent(self.rx_mbufs[0], ALLOC_RX_BUFFER_PAGES);
     }
 }

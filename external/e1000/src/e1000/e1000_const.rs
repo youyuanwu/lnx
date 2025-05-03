@@ -2,7 +2,7 @@
 // from the Intel 82540EP/EM &c manual.
 
 /* Registers */
-pub(crate) const E1000_CTL: usize = 0x00000 / 4; /* Device Control Register - RW */
+pub(crate) const E1000_CTL: usize = 0x00000; /* Device Control Register - RW */
 pub(crate) const E1000_STAT: usize = 0x00008 / 4; /* Device Status Register - R */
 pub(crate) const E1000_ICR: usize = 0x000C0 / 4; /* Interrupt Cause Read - R */
 pub(crate) const E1000_ITR: usize = 0x000C4 / 4; /* Interrupt Throttling Rate - RW */

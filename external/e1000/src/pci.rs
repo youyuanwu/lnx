@@ -1,7 +1,7 @@
 // Simple PCI-Express for qemu and its e1000 ethernet
 use core::slice::from_raw_parts_mut;
-use volatile::Volatile;
 use log::*;
+use volatile::Volatile;
 
 /// E1000 registers which were mapped
 pub const E1000_REGS: u32 = 0x40000000;
@@ -19,7 +19,7 @@ pub fn pci_init() {
         let off: u32 = (bus << 16) | (dev << 11) | (func << 8) | offset;
         let base = ECAM + off;
         let pci_base = base as *mut Volatile<u32>;
-        let deve_id = unsafe{ (*pci_base).read() };
+        let deve_id = unsafe { (*pci_base).read() };
         trace!("PCI device id: {:#x} @ {:#x}", deve_id, base);
 
         // E1000 ID = 100e:8086
@@ -42,7 +42,7 @@ pub fn pci_init() {
             }
 
             // To reveal e1000 registers at E1000_REGS;
-            pci_config[4 + 0].write(E1000_REGS);
+            pci_config[4].write(E1000_REGS);
 
             //e1000_init((*mut u32)E1000_REGS);
         }

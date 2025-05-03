@@ -7,3 +7,4 @@ build
 *.ko
 *.o
 rust-project.json
+target
