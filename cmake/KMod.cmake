@@ -20,6 +20,13 @@ function(add_kmod)
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
 
+  # copy kmod file into build dir
+  add_custom_command(TARGET ${KMOD_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/bin_kmods
+    COMMAND ${CMAKE_COMMAND} 
+        -E copy_if_different ${CMAKE_CURRENT_SOURCE_DIR}/${KMOD_NAME}.ko ${CMAKE_BINARY_DIR}/bin_kmods
+  )
+
   add_custom_target(${KMOD_NAME}_clean
     COMMAND $(MAKE) -C ${KMOD_KDIR} M=${CMAKE_CURRENT_SOURCE_DIR} LLVM=1 clean
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

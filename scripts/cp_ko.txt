@@ -1,10 +1,10 @@
 mkdir /lib/modules/6.15.0-rc1-g0af2f6be1b42
 
 rm /lib/modules/6.15.0-rc1-g0af2f6be1b42/rust_out_of_tree.ko
-write ../kmods/rust_out_of_tree/rust_out_of_tree.ko /lib/modules/6.15.0-rc1-g0af2f6be1b42/rust_out_of_tree.ko
+write ../build/bin_kmods/rust_out_of_tree.ko /lib/modules/6.15.0-rc1-g0af2f6be1b42/rust_out_of_tree.ko
 
 rm /lib/modules/6.15.0-rc1-g0af2f6be1b42/rust_misc_device.ko
-write ../kmods/rust_misc_device/rust_misc_device.ko /lib/modules/6.15.0-rc1-g0af2f6be1b42/rust_misc_device.ko
+write ../build/bin_kmods/rust_misc_device.ko /lib/modules/6.15.0-rc1-g0af2f6be1b42/rust_misc_device.ko
 
 rm /etc/modules
 write ../data/modules.conf /etc/modules

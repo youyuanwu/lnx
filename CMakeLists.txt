@@ -5,7 +5,7 @@ set(KDIR_ROOT ${CMAKE_SOURCE_DIR}/../linux)
 
 add_custom_target(rs_analyzer)
 add_custom_target(clean_all)
-add_subdirectory(kmods)
+add_subdirectory(external/kmods)
 
 # copy stuff in image
 # mount
