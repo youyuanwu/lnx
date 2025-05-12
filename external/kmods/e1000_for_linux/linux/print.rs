@@ -1,9 +1,9 @@
 macro_rules! info {
-    ($($arg:tt)*) => (
+    ($($arg:tt)*) => {
         /*
         $crate::pr_info!($($arg)*);
         */
-    )
+    };
 }
 macro_rules! debug (
     ($($arg:tt)*) => (

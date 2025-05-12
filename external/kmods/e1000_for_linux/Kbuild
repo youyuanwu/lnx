@@ -1,0 +1,12 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-m := e1000_for_linux.o
+
+# rustflags-y := --extern alloc
+# -Z build-std=core,alloc
+
+# e1000_driver.o:
+# 	cp $(PWD)/../../../../target/debug/deps/e1000_driver-*.o $(PWD)/../../../../external/e1000/kmod/e1000_driver.o
+
+# rustflags-y := --extern add -L $(PWD)/../../../../target/debug/deps
+# e1000_for_linux-y := e1000_for_linux_main.o e1000_driver.o

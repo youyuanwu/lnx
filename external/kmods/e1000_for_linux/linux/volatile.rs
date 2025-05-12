@@ -15,7 +15,7 @@ pub struct Volatile<T: Copy>(T);
 impl<T: Copy> Volatile<T> {
     /// Construct a new volatile instance wrapping the given value.
     ///
-    /// ```rust
+    /// ```rus
     /// use volatile::Volatile;
     ///
     /// let value = Volatile::new(0u32);

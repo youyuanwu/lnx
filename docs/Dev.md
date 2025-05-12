@@ -33,9 +33,12 @@ sudo cp ../../rust_out_of_tree.ko ./rootfs
 sudo umount ./rootfs
 ```
 
-insmod /etc/modules-load.d/rust_out_of_tree.ko 
+insmod /lib/modules/6.15.0-rc5-gb4099f6aa966/rust_out_of_tree.ko 
 lsmod
 rmmod rust_out_of_tree
+
+depmod -a
+dmesg | grep e1000
 
 shutdown now
 
@@ -88,3 +91,23 @@ mount /dev/loop0 ./build/tmp/debianmnt/
 # without mount
 mcopy -i disk.img file_to_copy ::/destination_path
 ```
+
+# e1000
+```
+insmod /lib/modules/6.15.0-rc1-g0af2f6be1b42/e1000_for_linux.ko
+ip link ls
+ip link set eth0 up
+ip addr add broadcast 10.0.2.255 dev eth0
+ip addr add 10.0.2.15/255.255.255.0 dev eth0 
+ip route add default via 10.0.2.1 
+```
+
+```
+    4.222979] e1000: eth0 NIC Link is Up 1000 Mbps Full Duplex, Flow Control: RX
+[    4.241899] IP-Config: Complete:
+[    4.242518]      device=eth0, hwaddr=52:54:00:12:34:56, ipaddr=10.0.2.15, mask=255.255.255.0, gw=10.0.2.1
+[    4.243057]      host=10.0.2.15, domain=, nis-domain=(none)
+[    4.243324]      bootserver=255.255.255.255, rootserver=255.255.255.255, rootpath=
+```
+
+enp0s3
