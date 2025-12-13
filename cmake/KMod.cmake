@@ -19,7 +19,8 @@ function(add_kmod)
     COMMAND $(MAKE) -C ${KMOD_KDIR} M=${CMAKE_CURRENT_SOURCE_DIR} MO=${CMAKE_CURRENT_BINARY_DIR} LLVM=1 O=${KBIN_ROOT} modules
     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
   )
-# find . -name "*.rs" | xargs rustfmt
+
+  # find . -name "*.rs" | xargs rustfmt
   add_custom_target(${KMOD_NAME}_fmt
     COMMAND find . -name \"*.rs\" -exec rustfmt {} \\\;
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}

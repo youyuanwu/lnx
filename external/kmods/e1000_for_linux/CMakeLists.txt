@@ -1,8 +1,9 @@
-include(${CMAKE_SOURCE_DIR}/cmake/KMod.cmake)
-add_kmod(
-  NAME e1000_for_linux
-  KDIR ${KDIR_ROOT}
-)
+# Rust linux api is changed and this no longer compiles.
+# include(${CMAKE_SOURCE_DIR}/cmake/KMod.cmake)
+# add_kmod(
+#   NAME e1000_for_linux
+#   KDIR ${KDIR_ROOT}
+# )
 
 # add_custom_command(TARGET e1000_for_linux PRE_BUILD
 #   COMMAND cargo build

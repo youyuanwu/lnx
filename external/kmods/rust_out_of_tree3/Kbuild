@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0
+
+# Tell KBuild to build a module from pre-built object files
+obj-m := rust_out_of_tree3.o
+
+# Use pre-built object files (compiled by rustc in Makefile)
+# This prevents KBuild from trying to compile the .rs files again
+rust_out_of_tree3-objs := rust_out_of_tree3_prebuilt.o lib_vec.o

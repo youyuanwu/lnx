@@ -2,7 +2,7 @@
   "rust-analyzer.linkedProjects": [
     "build/external/kmods/rust_out_of_tree/rust-project.json",
     "build/external/kmods/rust_misc_device/rust-project.json",
-    "build/external/kmods/e1000_for_linux/rust-project.json",
+    // "build/external/kmods/e1000_for_linux/rust-project.json",
     "Cargo.toml"
   ]
 }
