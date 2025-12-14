@@ -14,6 +14,7 @@ add_custom_target(rs_analyzer_all)
 add_custom_target(clean_all)
 add_custom_target(fmt_all)
 add_subdirectory(external/kmods)
+add_subdirectory(samples/einux-kmod)
 
 # copy stuff in image
 # mount
@@ -57,6 +58,11 @@ add_custom_target(configure_linux
 # disable net device to avoid driver conflicts.
 add_custom_target(make_linux
   COMMAND $(MAKE) LLVM=1 O=${KBIN_ROOT}
+  WORKING_DIRECTORY ${KDIR_ROOT}
+)
+
+add_custom_target(clean_linux
+  COMMAND $(MAKE) O=${KBIN_ROOT} clean
   WORKING_DIRECTORY ${KDIR_ROOT}
 )
 

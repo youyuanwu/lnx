@@ -1,8 +1,8 @@
 # SPDX-License-Identifier: GPL-2.0
 
 # Tell KBuild to build a module from pre-built object files
-obj-m := rust_out_of_tree3.o
+obj-m := einux_kmod.o
 
-# Use pre-built object files (compiled by rustc in Makefile)
+# Use pre-built object files (compiled by cargo in Makefile)
 # Object files are in the MO (module output) directory
-rust_out_of_tree3-objs := rust_out_of_tree3_mod.o lib_vec.o
+einux_kmod-objs := einux_kmod_main.o einux_vec.o

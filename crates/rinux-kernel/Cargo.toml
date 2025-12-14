@@ -1,0 +1,12 @@
+[package]
+name = "rinux-kernel"
+version = "0.1.0"
+edition = "2021"
+# This crate could be ignored in thie workspace
+# use kernel crate directly.
+
+[lib]
+test = false
+bench = false
+
+[dependencies]

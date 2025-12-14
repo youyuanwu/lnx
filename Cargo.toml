@@ -2,5 +2,13 @@
 resolver = "2"
 
 members = [
-  "external/e1000"
+  # "external/e1000"
+  "crates/rinux-bindings"
+  , "crates/rinux-kernel"
+  , "samples/einux-kmod"
+  , "samples/einux-vec"
 ]
+
+[workspace.dependencies]
+rinux-bindings = { path = "crates/rinux-bindings" }
+rinux-kernel = { path = "crates/rinux-kernel" }

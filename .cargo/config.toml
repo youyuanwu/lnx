@@ -1,0 +1,59 @@
+[env]
+# Enable unstable features on stable rustc. Same as linux makefile.
+RUSTC_BOOTSTRAP = "1"
+OBJTREE = "/home/user1/code/lnx/build/linux_bin"
+
+[build]
+# Target specification for kernel modules
+target = "build/linux_bin/scripts/target.json"
+
+[target.'cfg(all())']
+rustflags = [
+    # Library search path for pre-built kernel libraries
+    "-L", "/home/user1/code/lnx/build/linux_bin/rust",
+    
+    # Extern flags for rinux-bindings dependencies (from linux/rust/Makefile)
+    # bindings.o requires: --extern ffi --extern pin_init
+    # Plus their transitive dependencies: core, compiler_builtins
+    "--extern", "core",
+    "--extern", "compiler_builtins",
+    "--extern", "ffi",
+    "--extern", "pin_init",
+    "--extern", "bindings",
+    "--extern", "kernel",
+    
+    # Edition and warnings
+    "-Dunsafe_op_in_unsafe_fn",
+    
+    # Code generation flags
+    "-Cpanic=abort",
+    "-Cembed-bitcode=n",
+    "-Clto=n",
+    "-Cforce-unwind-tables=n",
+    "-Ccodegen-units=1",
+    "-Csymbol-mangling-version=v0",
+    "-Crelocation-model=static",
+    
+    # Target CPU and features
+    "-Ctarget-feature=-sse,-sse2,-sse3,-ssse3,-sse4.1,-sse4.2,-avx,-avx2",
+    "-Ctarget-cpu=x86-64",
+    "-Cno-redzone=y",
+    "-Ccode-model=kernel",
+    
+    # Optimization
+    "-Copt-level=2",
+    "-Cdebug-assertions=n",
+    "-Coverflow-checks=y",
+    
+    # Unstable options (require RUSTC_BOOTSTRAP=1 or nightly)
+    "-Zcf-protection=branch",
+    "-Zno-jump-tables",
+    "-Zfunction-return=thunk-extern",
+    "-Zpatchable-function-entry=16,16",
+    "-Zallow-features=arbitrary_self_types,used_with_arg",
+    "-Zcrate-attr=feature(arbitrary_self_types,used_with_arg)",
+    "-Zunstable-options",
+    
+    # Kernel module configuration
+    "--cfg", "MODULE",
+]

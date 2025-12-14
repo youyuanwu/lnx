@@ -1,13 +1,13 @@
-add_custom_target(rust_out_of_tree3 ALL
+add_custom_target(einux_kmod ALL
   COMMAND $(MAKE) -C ${CMAKE_CURRENT_SOURCE_DIR} KERNEL_BUILD=${KBIN_ROOT} KERNEL_SOURCE=${KDIR_ROOT}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-add_custom_target(rust_out_of_tree3_clean
+add_custom_target(einux_kmod_clean
   COMMAND $(MAKE) -C ${CMAKE_CURRENT_SOURCE_DIR} clean KERNEL_BUILD=${KBIN_ROOT} KERNEL_SOURCE=${KDIR_ROOT}
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
 add_dependencies(clean_all
-  rust_out_of_tree3_clean
+  einux_kmod_clean
 )
