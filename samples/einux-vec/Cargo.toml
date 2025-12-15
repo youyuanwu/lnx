@@ -6,6 +6,3 @@ edition = "2021"
 [lib]
 test = false
 bench = false
-
-[dependencies]
-rinux-kernel = { workspace = true }

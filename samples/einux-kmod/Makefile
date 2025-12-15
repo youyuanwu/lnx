@@ -2,7 +2,6 @@
 
 # Paths - using relative paths to kernel build directory
 KERNEL_BUILD := MUST_OVERRIDE
-KERNEL_SOURCE := MUST_OVERRIDE
 
 # Build output directory
 BUILD_DIR := $(abspath ../../build/samples/einux-kmod/build)
@@ -42,7 +41,7 @@ $(MODULE_OBJ): $(SRC_DIR)/src/lib.rs $(EINUX_VEC_OBJ)
 
 # Step 3: Use KBuild to link all objects into a kernel module
 $(KO_FILE): $(MODULE_OBJ) $(EINUX_VEC_OBJ)
-	@echo "Linking kernel module with KBuild: $@"
+	@echo "Linking kernel module with KBuild:$@"
 	@$(MAKE) -C $(KERNEL_BUILD) M=$(SRC_DIR) MO=$(BUILD_DIR) LLVM=1 modules
 
 clean:

@@ -1,7 +1,7 @@
 [env]
 # Enable unstable features on stable rustc. Same as linux makefile.
 RUSTC_BOOTSTRAP = "1"
-OBJTREE = "/home/user1/code/lnx/build/linux_bin"
+OBJTREE = "build/linux_bin"
 
 [build]
 # Target specification for kernel modules
@@ -10,7 +10,7 @@ target = "build/linux_bin/scripts/target.json"
 [target.'cfg(all())']
 rustflags = [
     # Library search path for pre-built kernel libraries
-    "-L", "/home/user1/code/lnx/build/linux_bin/rust",
+    "-L", "build/linux_bin/rust",
     
     # Extern flags for rinux-bindings dependencies (from linux/rust/Makefile)
     # bindings.o requires: --extern ffi --extern pin_init

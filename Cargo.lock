@@ -12,9 +12,6 @@ dependencies = [
 [[package]]
 name = "einux-vec"
 version = "0.1.0"
-dependencies = [
- "rinux-kernel",
-]
 
 [[package]]
 name = "rinux-bindings"

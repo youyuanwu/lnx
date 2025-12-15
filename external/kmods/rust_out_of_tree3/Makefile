@@ -52,7 +52,7 @@ $(OBJ_FILE): $(RUST_SOURCE) $(LIB_VEC_OBJ)
 
 # Step 2: Use KBuild to link the Rust object into a kernel module
 $(KO_FILE): $(OBJ_FILE)
-	@echo "Building kernel module with KBuild: $@"
+	@echo "Building kernel module with KBuild:$@"
 	@$(MAKE) -C $(KERNEL_BUILD) M=$(SRC_DIR) MO=$(BUILD_DIR) LLVM=1 modules
 
 clean:
