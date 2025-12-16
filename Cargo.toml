@@ -4,7 +4,7 @@ resolver = "2"
 members = [
   # "external/e1000"
   "crates/rinux-bindings"
-  , "crates/rinux-kernel"
+  , "crates/rinux-fs", "crates/rinux-kernel"
   , "samples/einux-kmod"
   , "samples/einux-vec"
 ]
@@ -12,3 +12,4 @@ members = [
 [workspace.dependencies]
 rinux-bindings = { path = "crates/rinux-bindings" }
 rinux-kernel = { path = "crates/rinux-kernel" }
+bindgen = "0.72"
