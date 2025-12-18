@@ -1,17 +1,27 @@
-mkdir /lib/modules/6.15.0-rc5-gb4099f6aa966
+cd /usr/lib
+mkdir modules
+cd /usr/lib/modules
+mkdir 6.18.0
 
-rm /lib/modules/6.15.0-rc5-gb4099f6aa966/rust_out_of_tree.ko
-write ../build/bin_kmods/rust_out_of_tree.ko /lib/modules/6.15.0-rc5-gb4099f6aa966/rust_out_of_tree.ko
+cd /usr/lib/modules/6.18.0
 
-rm /lib/modules/6.15.0-rc5-gb4099f6aa966/rust_misc_device.ko
-write ../build/bin_kmods/rust_misc_device.ko /lib/modules/6.15.0-rc5-gb4099f6aa966/rust_misc_device.ko
+rm rust_out_of_tree.ko
+write ../build/bin_kmods/rust_out_of_tree.ko rust_out_of_tree.ko
 
-rm /lib/modules/6.15.0-rc5-gb4099f6aa966/e1000_for_linux.ko
-write ../build/bin_kmods/e1000_for_linux.ko /lib/modules/6.15.0-rc5-gb4099f6aa966/e1000_for_linux.ko
+rm rust_misc_device.ko
+write ../build/bin_kmods/rust_misc_device.ko rust_misc_device.ko
 
-rm /etc/modules
-write ../data/modules.conf /etc/modules
+rm e1000_for_linux.ko
+write ../build/bin_kmods/e1000_for_linux.ko e1000_for_linux.ko
 
-rm /etc/modprobe.d/blacklist.conf
-write ../data/blacklist.conf /etc/modprobe.d/blacklist.conf
+rm rinux_rofs.ko
+write ../build/bin_kmods/rinux_rofs.ko rinux_rofs.ko
+
+cd /etc
+rm modules
+write ../data/modules.conf modules
+
+cd /etc/modprobe.d
+rm blacklist.conf
+write ../data/blacklist.conf blacklist.conf
 

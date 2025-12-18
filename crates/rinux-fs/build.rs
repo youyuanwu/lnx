@@ -21,6 +21,21 @@ fn overwrite_bindgen() {
         .join("include")
         .join("generated");
 
+    // UAPI include paths (needed for asm/types.h, etc.)
+    let inc_uapi = linux_src.join("include").join("uapi");
+    let inc_generated_uapi = linux_build.join("include").join("generated").join("uapi");
+    let inc_arch_uapi = linux_src
+        .join("arch")
+        .join("x86")
+        .join("include")
+        .join("uapi");
+    let inc_arch_generated_uapi = linux_build
+        .join("arch")
+        .join("x86")
+        .join("include")
+        .join("generated")
+        .join("uapi");
+
     // Match kernel's bindgen configuration from linux/rust/Makefile
     // BINDGEN_TARGET_x86 := x86_64-linux-gnu (note: NOT x86_64-unknown-linux-gnu)
     // The kernel uses the GNU target triple without "unknown"
@@ -32,12 +47,19 @@ fn overwrite_bindgen() {
         .header(manifest_dir.join("ffi/wrapper.h").to_str().unwrap())
         // Match kernel: --target=$(BINDGEN_TARGET)
         .clang_arg(format!("--target={}", target))
+        // Prevent use of system headers
+        .clang_arg("-nostdinc")
         // Include paths in the order the kernel uses them
         .clang_arg(format!("-I{}", inc_dir.to_string_lossy()))
         .clang_arg(format!("-I{}", inc_generated.to_string_lossy()))
         .clang_arg(format!("-I{}", inc_arch_src.to_string_lossy()))
         .clang_arg(format!("-I{}", inc_arch.to_string_lossy()))
         .clang_arg(format!("-I{}", inc_arch_generated.to_string_lossy()))
+        // UAPI include paths for asm/types.h, etc.
+        .clang_arg(format!("-I{}", inc_uapi.to_string_lossy()))
+        .clang_arg(format!("-I{}", inc_generated_uapi.to_string_lossy()))
+        .clang_arg(format!("-I{}", inc_arch_uapi.to_string_lossy()))
+        .clang_arg(format!("-I{}", inc_arch_generated_uapi.to_string_lossy()))
         // Match kernel: --use-core --with-derive-default --ctypes-prefix ffi
         .use_core()
         .derive_default(true)
@@ -58,6 +80,14 @@ fn overwrite_bindgen() {
         ))
         .allowlist_recursively(true)
         .allowlist_item("folio_.*")
+        .allowlist_item("BINDINGS_.*")
+        .allowlist_item("fs_context_.*")
+        .allowlist_item("get_tree_.*")
+        .allowlist_item("generic_.*")
+        .allowlist_item("page_get_link|init_special_inode|inode_nohighmem|set_nlink")
+        .allowlist_item(".*_inode")
+        //.allowlist_item("kmem_.*")
+        //.allowlist_item("DT_.*")
         // Tell cargo to invalidate the built crate whenever any of the
         // included header files changed.
         .parse_callbacks(Box::new(bindgen::CargoCallbacks::new()))

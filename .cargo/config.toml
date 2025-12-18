@@ -19,7 +19,7 @@ rustflags = [
     "--extern", "compiler_builtins",
     "--extern", "ffi",
     "--extern", "pin_init",
-    "--extern", "bindings",
+    # "--extern", "bindings",
     "--extern", "kernel",
     
     # Edition and warnings

@@ -166,6 +166,50 @@ impl<T> ::core::fmt::Debug for __IncompleteArrayField<T> {
         fmt.write_str("__IncompleteArrayField")
     }
 }
+#[repr(C)]
+pub struct __BindgenUnionField<T>(::core::marker::PhantomData<T>);
+impl<T> __BindgenUnionField<T> {
+    #[inline]
+    pub const fn new() -> Self {
+        __BindgenUnionField(::core::marker::PhantomData)
+    }
+    #[inline]
+    pub unsafe fn as_ref(&self) -> &T {
+        ::core::mem::transmute(self)
+    }
+    #[inline]
+    pub unsafe fn as_mut(&mut self) -> &mut T {
+        ::core::mem::transmute(self)
+    }
+}
+impl<T> ::core::default::Default for __BindgenUnionField<T> {
+    #[inline]
+    fn default() -> Self {
+        Self::new()
+    }
+}
+impl<T> ::core::clone::Clone for __BindgenUnionField<T> {
+    #[inline]
+    fn clone(&self) -> Self {
+        *self
+    }
+}
+impl<T> ::core::marker::Copy for __BindgenUnionField<T> {}
+impl<T> ::core::fmt::Debug for __BindgenUnionField<T> {
+    fn fmt(&self, fmt: &mut ::core::fmt::Formatter<'_>) -> ::core::fmt::Result {
+        fmt.write_str("__BindgenUnionField")
+    }
+}
+impl<T> ::core::hash::Hash for __BindgenUnionField<T> {
+    fn hash<H: ::core::hash::Hasher>(&self, _state: &mut H) {}
+}
+impl<T> ::core::cmp::PartialEq for __BindgenUnionField<T> {
+    fn eq(&self, _other: &__BindgenUnionField<T>) -> bool {
+        true
+    }
+}
+impl<T> ::core::cmp::Eq for __BindgenUnionField<T> {}
+pub type __s8 = ffi::c_schar;
 pub type __u8 = ffi::c_uchar;
 pub type __s16 = ffi::c_short;
 pub type __u16 = ffi::c_ushort;
@@ -173,6 +217,7 @@ pub type __s32 = ffi::c_int;
 pub type __u32 = ffi::c_uint;
 pub type __s64 = ffi::c_longlong;
 pub type __u64 = ffi::c_ulonglong;
+pub type s8 = __s8;
 pub type u8_ = __u8;
 pub type s16 = __s16;
 pub type u16_ = __u16;
@@ -185,6 +230,7 @@ pub type __kernel_ulong_t = ffi::c_ulong;
 pub type __kernel_pid_t = ffi::c_int;
 pub type __kernel_uid32_t = ffi::c_uint;
 pub type __kernel_gid32_t = ffi::c_uint;
+pub type __kernel_size_t = __kernel_ulong_t;
 pub type __kernel_loff_t = ffi::c_longlong;
 pub type __kernel_time64_t = ffi::c_longlong;
 pub type __kernel_clock_t = __kernel_long_t;
@@ -204,6 +250,7 @@ pub type ktime_t = s64;
 pub type sector_t = u64_;
 pub type blkcnt_t = u64_;
 pub type gfp_t = ffi::c_uint;
+pub type slab_flags_t = ffi::c_uint;
 pub type fmode_t = ffi::c_uint;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
@@ -214,6 +261,11 @@ pub struct atomic_t {
 #[derive(Debug, Default, Copy, Clone)]
 pub struct atomic64_t {
     pub counter: s64,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct rcuref_t {
+    pub refcnt: atomic_t,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -327,9 +379,77 @@ impl Default for file_system_type {
     }
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[repr(align(64))]
+#[derive(Copy, Clone)]
 pub struct module {
-    _unused: [u8; 0],
+    pub state: module_state,
+    pub list: list_head,
+    pub name: [ffi::c_char; 56usize],
+    pub mkobj: module_kobject,
+    pub modinfo_attrs: *mut module_attribute,
+    pub version: *const ffi::c_char,
+    pub srcversion: *const ffi::c_char,
+    pub holders_dir: *mut kobject,
+    pub syms: *mut kernel_symbol,
+    pub crcs: *const u32_,
+    pub num_syms: ffi::c_uint,
+    pub param_lock: mutex,
+    pub kp: *mut kernel_param,
+    pub num_kp: ffi::c_uint,
+    pub num_gpl_syms: ffi::c_uint,
+    pub gpl_syms: *const kernel_symbol,
+    pub gpl_crcs: *const u32_,
+    pub using_gplonly_symbols: bool_,
+    pub async_probe_requested: bool_,
+    pub num_exentries: ffi::c_uint,
+    pub extable: *mut exception_table_entry,
+    pub init: ::core::option::Option<unsafe extern "C" fn() -> ffi::c_int>,
+    pub mem: [module_memory; 7usize],
+    pub arch: mod_arch_specific,
+    pub taints: ffi::c_ulong,
+    pub num_bugs: ffi::c_uint,
+    pub bug_list: list_head,
+    pub bug_table: *mut bug_entry,
+    pub kallsyms: *mut mod_kallsyms,
+    pub core_kallsyms: mod_kallsyms,
+    pub sect_attrs: *mut module_sect_attrs,
+    pub notes_attrs: *mut module_notes_attrs,
+    pub args: *mut ffi::c_char,
+    pub percpu: *mut ffi::c_void,
+    pub percpu_size: ffi::c_uint,
+    pub noinstr_text_start: *mut ffi::c_void,
+    pub noinstr_text_size: ffi::c_uint,
+    pub num_tracepoints: ffi::c_uint,
+    pub tracepoints_ptrs: *const ffi::c_int,
+    pub num_srcu_structs: ffi::c_uint,
+    pub srcu_struct_ptrs: *mut *mut srcu_struct,
+    pub jump_entries: *mut jump_entry,
+    pub num_jump_entries: ffi::c_uint,
+    pub num_trace_bprintk_fmt: ffi::c_uint,
+    pub trace_bprintk_fmt_start: *mut *const ffi::c_char,
+    pub trace_events: *mut *mut trace_event_call,
+    pub num_trace_events: ffi::c_uint,
+    pub trace_evals: *mut *mut trace_eval_map,
+    pub num_trace_evals: ffi::c_uint,
+    pub kprobes_text_start: *mut ffi::c_void,
+    pub kprobes_text_size: ffi::c_uint,
+    pub kprobe_blacklist: *mut ffi::c_ulong,
+    pub num_kprobe_blacklist: ffi::c_uint,
+    pub num_static_call_sites: ffi::c_int,
+    pub static_call_sites: *mut static_call_site,
+    pub source_list: list_head,
+    pub target_list: list_head,
+    pub exit: ::core::option::Option<unsafe extern "C" fn()>,
+    pub refcnt: atomic_t,
+}
+impl Default for module {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -414,6 +534,9 @@ pub type arch_rwlock_t = qrwlock;
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct lock_class_key {}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct lockdep_map {}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct raw_spinlock {
@@ -623,6 +746,198 @@ impl Default for file_operations {
     }
 }
 #[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct bug_entry {
+    pub bug_addr_disp: ffi::c_int,
+    pub file_disp: ffi::c_int,
+    pub line: ffi::c_ushort,
+    pub flags: ffi::c_ushort,
+}
+unsafe extern "C" {
+    pub fn generic_bug_clear_once();
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct static_call_site {
+    pub addr: s32,
+    pub key: s32,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct jump_entry {
+    pub code: s32,
+    pub target: s32,
+    pub key: ffi::c_long,
+}
+#[repr(C, packed)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct orc_entry {
+    pub sp_offset: s16,
+    pub bp_offset: s16,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 2usize]>,
+}
+impl orc_entry {
+    #[inline]
+    pub fn sp_reg(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 4u8) as u32) }
+    }
+    #[inline]
+    pub fn set_sp_reg(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 4u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn sp_reg_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                4u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_sp_reg_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                4u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn bp_reg(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(4usize, 4u8) as u32) }
+    }
+    #[inline]
+    pub fn set_bp_reg(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(4usize, 4u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn bp_reg_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                4usize,
+                4u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_bp_reg_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                4usize,
+                4u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn type_(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(8usize, 3u8) as u32) }
+    }
+    #[inline]
+    pub fn set_type(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(8usize, 3u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn type__raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                8usize,
+                3u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_type_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                8usize,
+                3u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn signal(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(11usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_signal(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(11usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn signal_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                11usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_signal_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                11usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        sp_reg: ffi::c_uint,
+        bp_reg: ffi::c_uint,
+        type_: ffi::c_uint,
+        signal: ffi::c_uint,
+    ) -> __BindgenBitfieldUnit<[u8; 2usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 2usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 4u8, {
+            let sp_reg: u32 = unsafe { ::core::mem::transmute(sp_reg) };
+            sp_reg as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 4u8, {
+            let bp_reg: u32 = unsafe { ::core::mem::transmute(bp_reg) };
+            bp_reg as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 3u8, {
+            let type_: u32 = unsafe { ::core::mem::transmute(type_) };
+            type_ as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 1u8, {
+            let signal: u32 = unsafe { ::core::mem::transmute(signal) };
+            signal as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct pollfd {
     _unused: [u8; 0],
@@ -731,6 +1046,27 @@ impl Default for restart_block {
             s.assume_init()
         }
     }
+}
+#[repr(C)]
+#[repr(align(64))]
+#[derive(Debug)]
+pub struct cacheline_padding {
+    pub x: __IncompleteArrayField<ffi::c_char>,
+}
+impl Default for cacheline_padding {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct range {
+    pub start: u64_,
+    pub end: u64_,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1171,8 +1507,21 @@ impl desc_struct {
         __bindgen_bitfield_unit
     }
 }
+pub type pteval_t = ffi::c_ulong;
+pub type pmdval_t = ffi::c_ulong;
+pub type pudval_t = ffi::c_ulong;
 pub type pgdval_t = ffi::c_ulong;
 pub type pgprotval_t = ffi::c_ulong;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct pte_t {
+    pub pte: pteval_t,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct pmd_t {
+    pub pmd: pmdval_t,
+}
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct pgprot {
@@ -1183,6 +1532,30 @@ pub type pgprot_t = pgprot;
 #[derive(Debug, Default, Copy, Clone)]
 pub struct pgd_t {
     pub pgd: pgdval_t,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct pud_t {
+    pub pud: pudval_t,
+}
+pub type pgtable_t = *mut page;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct seq_operations {
+    pub start: ::core::option::Option<
+        unsafe extern "C" fn(m: *mut seq_file, pos: *mut loff_t) -> *mut ffi::c_void,
+    >,
+    pub stop: ::core::option::Option<unsafe extern "C" fn(m: *mut seq_file, v: *mut ffi::c_void)>,
+    pub next: ::core::option::Option<
+        unsafe extern "C" fn(
+            m: *mut seq_file,
+            v: *mut ffi::c_void,
+            pos: *mut loff_t,
+        ) -> *mut ffi::c_void,
+    >,
+    pub show: ::core::option::Option<
+        unsafe extern "C" fn(m: *mut seq_file, v: *mut ffi::c_void) -> ffi::c_int,
+    >,
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -1363,6 +1736,9 @@ impl Default for __call_single_data {
     }
 }
 pub type call_single_data_t = __call_single_data;
+unsafe extern "C" {
+    pub fn generic_smp_call_function_single_interrupt();
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct spinlock {
@@ -1661,6 +2037,13 @@ pub struct rlimit {
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
+pub struct task_cputime {
+    pub stime: u64_,
+    pub utime: u64_,
+    pub sum_exec_runtime: ffi::c_ulonglong,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
 pub struct sigset_t {
     pub sig: [ffi::c_ulong; 1usize],
 }
@@ -1868,11 +2251,6 @@ impl Default for kernel_siginfo {
     }
 }
 pub type kernel_siginfo_t = kernel_siginfo;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct ucounts {
-    _unused: [u8; 0],
-}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct sigpending {
@@ -2117,11 +2495,6 @@ pub struct nameidata {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct nsproxy {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct perf_event_context {
     _unused: [u8; 0],
 }
@@ -2153,11 +2526,6 @@ pub struct robust_list_head {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct rq {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct seq_file {
     _unused: [u8; 0],
 }
 #[repr(C)]
@@ -4050,9 +4418,37 @@ pub struct old_timespec32 {
     pub tv_nsec: s32,
 }
 #[repr(C)]
-#[derive(Debug, Copy, Clone)]
+#[derive(Copy, Clone)]
 pub struct user_namespace {
-    _unused: [u8; 0],
+    pub uid_map: uid_gid_map,
+    pub gid_map: uid_gid_map,
+    pub projid_map: uid_gid_map,
+    pub parent: *mut user_namespace,
+    pub level: ffi::c_int,
+    pub owner: kuid_t,
+    pub group: kgid_t,
+    pub ns: ns_common,
+    pub flags: ffi::c_ulong,
+    pub parent_could_setfcap: bool_,
+    pub keyring_name_list: list_head,
+    pub user_keyring_register: *mut key,
+    pub keyring_sem: rw_semaphore,
+    pub work: work_struct,
+    pub set: ctl_table_set,
+    pub sysctls: *mut ctl_table_header,
+    pub ucounts: *mut ucounts,
+    pub ucount_max: [ffi::c_long; 10usize],
+    pub rlimit_max: [ffi::c_long; 4usize],
+    pub binfmt_misc: *mut binfmt_misc,
+}
+impl Default for user_namespace {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
@@ -4162,6 +4558,21 @@ impl Default for shrinker {
     }
 }
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct hlist_nulls_node {
+    pub next: *mut hlist_nulls_node,
+    pub pprev: *mut *mut hlist_nulls_node,
+}
+impl Default for hlist_nulls_node {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
 pub struct kref {
     pub refcount: refcount_t,
@@ -4233,6 +4644,166 @@ pub struct work_struct {
     pub func: work_func_t,
 }
 impl Default for work_struct {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct delayed_work {
+    pub work: work_struct,
+    pub timer: timer_list,
+    pub wq: *mut workqueue_struct,
+    pub cpu: ffi::c_int,
+}
+impl Default for delayed_work {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rcu_work {
+    pub work: work_struct,
+    pub rcu: callback_head,
+    pub wq: *mut workqueue_struct,
+}
+impl Default for rcu_work {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct rcu_segcblist {
+    pub head: *mut callback_head,
+    pub tails: [*mut *mut callback_head; 4usize],
+    pub gp_seq: [ffi::c_ulong; 4usize],
+    pub len: ffi::c_long,
+    pub seglen: [ffi::c_long; 4usize],
+    pub flags: u8_,
+}
+impl Default for rcu_segcblist {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct srcu_ctr {
+    pub srcu_locks: atomic_long_t,
+    pub srcu_unlocks: atomic_long_t,
+}
+#[repr(C)]
+#[repr(align(64))]
+#[derive(Copy, Clone)]
+pub struct srcu_data {
+    pub srcu_ctrs: [srcu_ctr; 2usize],
+    pub srcu_reader_flavor: ffi::c_int,
+    pub __bindgen_padding_0: [u32; 7usize],
+    pub lock: spinlock_t,
+    pub srcu_cblist: rcu_segcblist,
+    pub srcu_gp_seq_needed: ffi::c_ulong,
+    pub srcu_gp_seq_needed_exp: ffi::c_ulong,
+    pub srcu_cblist_invoking: bool_,
+    pub delay_work: timer_list,
+    pub work: work_struct,
+    pub srcu_barrier_head: callback_head,
+    pub mynode: *mut srcu_node,
+    pub grpmask: ffi::c_ulong,
+    pub cpu: ffi::c_int,
+    pub ssp: *mut srcu_struct,
+}
+impl Default for srcu_data {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct srcu_node {
+    pub lock: spinlock_t,
+    pub srcu_have_cbs: [ffi::c_ulong; 4usize],
+    pub srcu_data_have_cbs: [ffi::c_ulong; 4usize],
+    pub srcu_gp_seq_needed_exp: ffi::c_ulong,
+    pub srcu_parent: *mut srcu_node,
+    pub grplo: ffi::c_int,
+    pub grphi: ffi::c_int,
+}
+impl Default for srcu_node {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct srcu_usage {
+    pub node: *mut srcu_node,
+    pub level: [*mut srcu_node; 3usize],
+    pub srcu_size_state: ffi::c_int,
+    pub srcu_cb_mutex: mutex,
+    pub lock: spinlock_t,
+    pub srcu_gp_mutex: mutex,
+    pub srcu_gp_seq: ffi::c_ulong,
+    pub srcu_gp_seq_needed: ffi::c_ulong,
+    pub srcu_gp_seq_needed_exp: ffi::c_ulong,
+    pub srcu_gp_start: ffi::c_ulong,
+    pub srcu_last_gp_end: ffi::c_ulong,
+    pub srcu_size_jiffies: ffi::c_ulong,
+    pub srcu_n_lock_retries: ffi::c_ulong,
+    pub srcu_n_exp_nodelay: ffi::c_ulong,
+    pub sda_is_static: bool_,
+    pub srcu_barrier_seq: ffi::c_ulong,
+    pub srcu_barrier_mutex: mutex,
+    pub srcu_barrier_completion: completion,
+    pub srcu_barrier_cpu_cnt: atomic_t,
+    pub reschedule_jiffies: ffi::c_ulong,
+    pub reschedule_count: ffi::c_ulong,
+    pub work: delayed_work,
+    pub srcu_ssp: *mut srcu_struct,
+}
+impl Default for srcu_usage {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct srcu_struct {
+    pub srcu_ctrp: *mut srcu_ctr,
+    pub sda: *mut srcu_data,
+    pub dep_map: lockdep_map,
+    pub srcu_sup: *mut srcu_usage,
+}
+impl Default for srcu_struct {
     fn default() -> Self {
         let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
         unsafe {
@@ -4484,7 +5055,7 @@ pub struct mm_context_t {
     pub flags: ffi::c_ulong,
     pub lock: mutex,
     pub vdso: *mut ffi::c_void,
-    pub vdso_image: *mut vdso_image,
+    pub vdso_image: *const vdso_image,
     pub perf_rdpmc_allowed: atomic_t,
     pub pkey_allocation_map: u16_,
     pub execute_only_pkey: s16,
@@ -4953,7 +5524,7 @@ pub struct vm_area_desc {
     pub vm_file: *mut file,
     pub vm_flags: vm_flags_t,
     pub page_prot: pgprot_t,
-    pub vm_ops: *mut vm_operations_struct,
+    pub vm_ops: *const vm_operations_struct,
     pub private_data: *mut ffi::c_void,
 }
 impl Default for vm_area_desc {
@@ -5181,9 +5752,29 @@ impl Default for mm_struct {
         }
     }
 }
+pub type vm_fault_t = ffi::c_uint;
+pub const fault_flag_FAULT_FLAG_WRITE: fault_flag = 1;
+pub const fault_flag_FAULT_FLAG_MKWRITE: fault_flag = 2;
+pub const fault_flag_FAULT_FLAG_ALLOW_RETRY: fault_flag = 4;
+pub const fault_flag_FAULT_FLAG_RETRY_NOWAIT: fault_flag = 8;
+pub const fault_flag_FAULT_FLAG_KILLABLE: fault_flag = 16;
+pub const fault_flag_FAULT_FLAG_TRIED: fault_flag = 32;
+pub const fault_flag_FAULT_FLAG_USER: fault_flag = 64;
+pub const fault_flag_FAULT_FLAG_REMOTE: fault_flag = 128;
+pub const fault_flag_FAULT_FLAG_INSTRUCTION: fault_flag = 256;
+pub const fault_flag_FAULT_FLAG_INTERRUPTIBLE: fault_flag = 512;
+pub const fault_flag_FAULT_FLAG_UNSHARE: fault_flag = 1024;
+pub const fault_flag_FAULT_FLAG_ORIG_PTE_VALID: fault_flag = 2048;
+pub const fault_flag_FAULT_FLAG_VMA_LOCK: fault_flag = 4096;
+pub type fault_flag = ffi::c_uint;
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct dev_pagemap {
+pub struct device_node {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct irq_domain {
     _unused: [u8; 0],
 }
 unsafe extern "C" {
@@ -5197,6 +5788,26 @@ unsafe extern "C" {
         ilx: ffi::c_ulong,
         nid: ffi::c_int,
     ) -> *mut folio;
+}
+unsafe extern "C" {
+    pub fn generic_get_unmapped_area(
+        filp: *mut file,
+        addr: ffi::c_ulong,
+        len: ffi::c_ulong,
+        pgoff: ffi::c_ulong,
+        flags: ffi::c_ulong,
+        vm_flags: vm_flags_t,
+    ) -> ffi::c_ulong;
+}
+unsafe extern "C" {
+    pub fn generic_get_unmapped_area_topdown(
+        filp: *mut file,
+        addr: ffi::c_ulong,
+        len: ffi::c_ulong,
+        pgoff: ffi::c_ulong,
+        flags: ffi::c_ulong,
+        vm_flags: vm_flags_t,
+    ) -> ffi::c_ulong;
 }
 #[repr(C)]
 #[derive(Copy, Clone)]
@@ -5333,14 +5944,188 @@ pub const migrate_mode_MIGRATE_SYNC_LIGHT: migrate_mode = 1;
 pub const migrate_mode_MIGRATE_SYNC: migrate_mode = 2;
 pub type migrate_mode = ffi::c_uint;
 #[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct exception_table_entry {
+    pub insn: ffi::c_int,
+    pub fixup: ffi::c_int,
+    pub data: ffi::c_int,
+}
+#[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct mmu_notifier_subscriptions {
     _unused: [u8; 0],
 }
+pub type proc_handler = ::core::option::Option<
+    unsafe extern "C" fn(
+        ctl: *const ctl_table,
+        write: ffi::c_int,
+        buffer: *mut ffi::c_void,
+        lenp: *mut usize,
+        ppos: *mut loff_t,
+    ) -> ffi::c_int,
+>;
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ctl_table_poll {
+    pub event: atomic_t,
+    pub wait: wait_queue_head_t,
+}
+impl Default for ctl_table_poll {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct css_set {
-    _unused: [u8; 0],
+pub struct ctl_table {
+    pub procname: *const ffi::c_char,
+    pub data: *mut ffi::c_void,
+    pub maxlen: ffi::c_int,
+    pub mode: umode_t,
+    pub proc_handler: proc_handler,
+    pub poll: *mut ctl_table_poll,
+    pub extra1: *mut ffi::c_void,
+    pub extra2: *mut ffi::c_void,
+}
+impl Default for ctl_table {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ctl_node {
+    pub node: rb_node,
+    pub header: *mut ctl_table_header,
+}
+impl Default for ctl_node {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ctl_table_header {
+    pub __bindgen_anon_1: ctl_table_header__bindgen_ty_1,
+    pub unregistering: *mut completion,
+    pub ctl_table_arg: *const ctl_table,
+    pub root: *mut ctl_table_root,
+    pub set: *mut ctl_table_set,
+    pub parent: *mut ctl_dir,
+    pub node: *mut ctl_node,
+    pub inodes: hlist_head,
+    pub type_: ctl_table_header__bindgen_ty_2,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ctl_table_header__bindgen_ty_1 {
+    pub __bindgen_anon_1: ctl_table_header__bindgen_ty_1__bindgen_ty_1,
+    pub rcu: callback_head,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ctl_table_header__bindgen_ty_1__bindgen_ty_1 {
+    pub ctl_table: *const ctl_table,
+    pub ctl_table_size: ffi::c_int,
+    pub used: ffi::c_int,
+    pub count: ffi::c_int,
+    pub nreg: ffi::c_int,
+}
+impl Default for ctl_table_header__bindgen_ty_1__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for ctl_table_header__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const ctl_table_header_SYSCTL_TABLE_TYPE_DEFAULT: ctl_table_header__bindgen_ty_2 = 0;
+pub const ctl_table_header_SYSCTL_TABLE_TYPE_PERMANENTLY_EMPTY: ctl_table_header__bindgen_ty_2 = 1;
+pub type ctl_table_header__bindgen_ty_2 = ffi::c_uint;
+impl Default for ctl_table_header {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ctl_dir {
+    pub header: ctl_table_header,
+    pub root: rb_root,
+}
+impl Default for ctl_dir {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ctl_table_set {
+    pub is_seen:
+        ::core::option::Option<unsafe extern "C" fn(arg1: *mut ctl_table_set) -> ffi::c_int>,
+    pub dir: ctl_dir,
+}
+impl Default for ctl_table_set {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ctl_table_root {
+    pub default_set: ctl_table_set,
+    pub lookup: ::core::option::Option<
+        unsafe extern "C" fn(root: *mut ctl_table_root) -> *mut ctl_table_set,
+    >,
+    pub set_ownership: ::core::option::Option<
+        unsafe extern "C" fn(head: *mut ctl_table_header, uid: *mut kuid_t, gid: *mut kgid_t),
+    >,
+    pub permissions: ::core::option::Option<
+        unsafe extern "C" fn(head: *mut ctl_table_header, table: *const ctl_table) -> ffi::c_int,
+    >,
+}
+impl Default for ctl_table_root {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -5359,6 +6144,11 @@ impl Default for assoc_array {
 }
 pub type key_serial_t = i32;
 pub type key_perm_t = u32;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct net {
+    _unused: [u8; 0],
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct key_type {
@@ -6256,11 +7046,6 @@ pub struct io_context {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct fs_context {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct vfsmount {
     pub mnt_root: *mut dentry,
     pub mnt_sb: *mut super_block,
@@ -6286,6 +7071,126 @@ pub struct vfsuid_t {
 pub struct vfsgid_t {
     pub val: gid_t,
 }
+pub type percpu_ref_func_t = ::core::option::Option<unsafe extern "C" fn(arg1: *mut percpu_ref)>;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct percpu_ref_data {
+    pub count: atomic_long_t,
+    pub release: percpu_ref_func_t,
+    pub confirm_switch: percpu_ref_func_t,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub rcu: callback_head,
+    pub ref_: *mut percpu_ref,
+}
+impl Default for percpu_ref_data {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl percpu_ref_data {
+    #[inline]
+    pub fn force_atomic(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_force_atomic(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn force_atomic_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_force_atomic_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn allow_reinit(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_allow_reinit(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn allow_reinit_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_allow_reinit_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        force_atomic: bool_,
+        allow_reinit: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let force_atomic: u8 = unsafe { ::core::mem::transmute(force_atomic) };
+            force_atomic as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let allow_reinit: u8 = unsafe { ::core::mem::transmute(allow_reinit) };
+            allow_reinit as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct percpu_ref {
+    pub percpu_count_ptr: ffi::c_ulong,
+    pub data: *mut percpu_ref_data,
+}
+impl Default for percpu_ref {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct vm_struct {
@@ -6303,11 +7208,6 @@ pub type rw_hint = ffi::c_uchar;
 #[derive(Debug, Default, Copy, Clone)]
 pub struct file_ref_t {
     pub refcnt: atomic64_t,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct backing_dev_info {
-    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -6337,11 +7237,6 @@ pub struct kstatfs {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct swap_info_struct {
-    _unused: [u8; 0],
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct iov_iter {
     _unused: [u8; 0],
 }
 #[repr(C)]
@@ -6703,11 +7598,6 @@ impl Default for quota_info {
             s.assume_init()
         }
     }
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct writeback_control {
-    _unused: [u8; 0],
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -7430,6 +8320,16 @@ impl Default for inode_operations {
         }
     }
 }
+unsafe extern "C" {
+    pub fn generic_remap_file_range_prep(
+        file_in: *mut file,
+        pos_in: loff_t,
+        file_out: *mut file,
+        pos_out: loff_t,
+        count: *mut loff_t,
+        remap_flags: ffi::c_uint,
+    ) -> ffi::c_int;
+}
 pub const freeze_holder_FREEZE_HOLDER_KERNEL: freeze_holder = 1;
 pub const freeze_holder_FREEZE_HOLDER_USERSPACE: freeze_holder = 2;
 pub const freeze_holder_FREEZE_MAY_NEST: freeze_holder = 4;
@@ -7525,6 +8425,183 @@ pub struct super_operations {
     >,
     pub shutdown: ::core::option::Option<unsafe extern "C" fn(sb: *mut super_block)>,
 }
+unsafe extern "C" {
+    pub fn set_nlink(inode: *mut inode, nlink: ffi::c_uint);
+}
+unsafe extern "C" {
+    pub fn generic_shutdown_super(sb: *mut super_block);
+}
+unsafe extern "C" {
+    pub fn generic_update_time(arg1: *mut inode, arg2: ffi::c_int) -> ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct audit_names {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug)]
+pub struct filename {
+    pub name: *const ffi::c_char,
+    pub uptr: *const ffi::c_char,
+    pub refcnt: atomic_t,
+    pub aname: *mut audit_names,
+    pub iname: __IncompleteArrayField<ffi::c_char>,
+}
+impl Default for filename {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn init_special_inode(arg1: *mut inode, arg2: umode_t, arg3: dev_t);
+}
+unsafe extern "C" {
+    pub fn make_bad_inode(arg1: *mut inode);
+}
+unsafe extern "C" {
+    pub fn is_bad_inode(arg1: *mut inode) -> bool_;
+}
+unsafe extern "C" {
+    pub fn generic_permission(
+        arg1: *mut mnt_idmap,
+        arg2: *mut inode,
+        arg3: ffi::c_int,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn unlock_new_inode(arg1: *mut inode);
+}
+unsafe extern "C" {
+    pub fn discard_new_inode(arg1: *mut inode);
+}
+unsafe extern "C" {
+    pub fn clear_inode(arg1: *mut inode);
+}
+unsafe extern "C" {
+    pub fn __destroy_inode(arg1: *mut inode);
+}
+unsafe extern "C" {
+    pub fn alloc_inode(sb: *mut super_block) -> *mut inode;
+}
+unsafe extern "C" {
+    pub fn new_inode(sb: *mut super_block) -> *mut inode;
+}
+unsafe extern "C" {
+    pub fn generic_file_mmap(arg1: *mut file, arg2: *mut vm_area_struct) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_file_mmap_prepare(desc: *mut vm_area_desc) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_file_readonly_mmap(arg1: *mut file, arg2: *mut vm_area_struct) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_file_readonly_mmap_prepare(desc: *mut vm_area_desc) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_write_checks(arg1: *mut kiocb, arg2: *mut iov_iter) -> isize;
+}
+unsafe extern "C" {
+    pub fn generic_write_checks_count(iocb: *mut kiocb, count: *mut loff_t) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_write_check_limits(
+        file: *mut file,
+        pos: loff_t,
+        count: *mut loff_t,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_file_rw_checks(file_in: *mut file, file_out: *mut file) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_file_read_iter(arg1: *mut kiocb, arg2: *mut iov_iter) -> isize;
+}
+unsafe extern "C" {
+    pub fn generic_file_write_iter(arg1: *mut kiocb, arg2: *mut iov_iter) -> isize;
+}
+unsafe extern "C" {
+    pub fn generic_file_direct_write(arg1: *mut kiocb, arg2: *mut iov_iter) -> isize;
+}
+unsafe extern "C" {
+    pub fn generic_perform_write(arg1: *mut kiocb, arg2: *mut iov_iter) -> isize;
+}
+unsafe extern "C" {
+    pub fn generic_file_llseek(file: *mut file, offset: loff_t, whence: ffi::c_int) -> loff_t;
+}
+unsafe extern "C" {
+    pub fn generic_file_llseek_size(
+        file: *mut file,
+        offset: loff_t,
+        whence: ffi::c_int,
+        maxsize: loff_t,
+        eof: loff_t,
+    ) -> loff_t;
+}
+unsafe extern "C" {
+    pub fn generic_llseek_cookie(
+        file: *mut file,
+        offset: loff_t,
+        whence: ffi::c_int,
+        cookie: *mut u64_,
+    ) -> loff_t;
+}
+unsafe extern "C" {
+    pub fn generic_file_open(inode: *mut inode, filp: *mut file) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub static generic_ro_fops: file_operations;
+}
+unsafe extern "C" {
+    pub fn page_get_link(
+        arg1: *mut dentry,
+        arg2: *mut inode,
+        arg3: *mut delayed_call,
+    ) -> *const ffi::c_char;
+}
+unsafe extern "C" {
+    pub fn generic_fillattr(arg1: *mut mnt_idmap, arg2: u32_, arg3: *mut inode, arg4: *mut kstat);
+}
+unsafe extern "C" {
+    pub fn generic_fill_statx_attr(inode: *mut inode, stat: *mut kstat);
+}
+unsafe extern "C" {
+    pub fn generic_fill_statx_atomic_writes(
+        stat: *mut kstat,
+        unit_min: ffi::c_uint,
+        unit_max: ffi::c_uint,
+        unit_max_opt: ffi::c_uint,
+    );
+}
+unsafe extern "C" {
+    pub fn alloc_anon_inode(arg1: *mut super_block) -> *mut inode;
+}
+unsafe extern "C" {
+    pub fn anon_inode_make_secure_inode(
+        sb: *mut super_block,
+        name: *const ffi::c_char,
+        context_inode: *const inode,
+    ) -> *mut inode;
+}
+unsafe extern "C" {
+    pub fn generic_read_dir(
+        arg1: *mut file,
+        arg2: *mut ffi::c_char,
+        arg3: usize,
+        arg4: *mut loff_t,
+    ) -> isize;
+}
+unsafe extern "C" {
+    pub fn make_empty_dir_inode(inode: *mut inode);
+}
+unsafe extern "C" {
+    pub fn is_empty_dir_inode(inode: *mut inode) -> bool_;
+}
 #[repr(C)]
 #[derive(Copy, Clone)]
 pub struct offset_ctx {
@@ -7539,6 +8616,5188 @@ impl Default for offset_ctx {
             s.assume_init()
         }
     }
+}
+unsafe extern "C" {
+    pub fn generic_file_fsync(
+        arg1: *mut file,
+        arg2: loff_t,
+        arg3: loff_t,
+        arg4: ffi::c_int,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_check_addressable(arg1: ffi::c_uint, arg2: u64_) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_set_sb_d_ops(sb: *mut super_block);
+}
+unsafe extern "C" {
+    pub fn generic_ci_match(
+        parent: *const inode,
+        name: *const qstr,
+        folded_name: *const qstr,
+        de_name: *const u8_,
+        de_name_len: u32_,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn inode_nohighmem(inode: *mut inode);
+}
+unsafe extern "C" {
+    pub fn generic_fadvise(
+        file: *mut file,
+        offset: loff_t,
+        len: loff_t,
+        advice: ffi::c_int,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_atomic_write_valid(iocb: *mut kiocb, iter: *mut iov_iter) -> ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct vmem_altmap {
+    pub base_pfn: ffi::c_ulong,
+    pub end_pfn: ffi::c_ulong,
+    pub reserve: ffi::c_ulong,
+    pub free: ffi::c_ulong,
+    pub align: ffi::c_ulong,
+    pub alloc: ffi::c_ulong,
+    pub inaccessible: bool_,
+}
+pub const memory_type_MEMORY_DEVICE_PRIVATE: memory_type = 1;
+pub const memory_type_MEMORY_DEVICE_COHERENT: memory_type = 2;
+pub const memory_type_MEMORY_DEVICE_FS_DAX: memory_type = 3;
+pub const memory_type_MEMORY_DEVICE_GENERIC: memory_type = 4;
+pub const memory_type_MEMORY_DEVICE_PCI_P2PDMA: memory_type = 5;
+pub type memory_type = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct dev_pagemap_ops {
+    pub page_free: ::core::option::Option<unsafe extern "C" fn(page: *mut page)>,
+    pub migrate_to_ram:
+        ::core::option::Option<unsafe extern "C" fn(vmf: *mut vm_fault) -> vm_fault_t>,
+    pub memory_failure: ::core::option::Option<
+        unsafe extern "C" fn(
+            pgmap: *mut dev_pagemap,
+            pfn: ffi::c_ulong,
+            nr_pages: ffi::c_ulong,
+            mf_flags: ffi::c_int,
+        ) -> ffi::c_int,
+    >,
+}
+#[repr(C)]
+pub struct dev_pagemap {
+    pub altmap: vmem_altmap,
+    pub ref_: percpu_ref,
+    pub done: completion,
+    pub type_: memory_type,
+    pub flags: ffi::c_uint,
+    pub vmemmap_shift: ffi::c_ulong,
+    pub ops: *const dev_pagemap_ops,
+    pub owner: *mut ffi::c_void,
+    pub nr_range: ffi::c_int,
+    pub __bindgen_anon_1: dev_pagemap__bindgen_ty_1,
+}
+#[repr(C)]
+pub struct dev_pagemap__bindgen_ty_1 {
+    pub range: __BindgenUnionField<range>,
+    pub __bindgen_anon_1: __BindgenUnionField<dev_pagemap__bindgen_ty_1__bindgen_ty_1>,
+    pub bindgen_union_field: [u64; 2usize],
+}
+#[repr(C)]
+#[derive(Debug, Default)]
+pub struct dev_pagemap__bindgen_ty_1__bindgen_ty_1 {
+    pub __empty_ranges: dev_pagemap__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1,
+    pub ranges: __IncompleteArrayField<range>,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct dev_pagemap__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1 {}
+impl Default for dev_pagemap__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for dev_pagemap {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct anon_vma {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct vm_fault {
+    pub __bindgen_anon_1: vm_fault__bindgen_ty_1,
+    pub flags: fault_flag,
+    pub pmd: *mut pmd_t,
+    pub pud: *mut pud_t,
+    pub __bindgen_anon_2: vm_fault__bindgen_ty_2,
+    pub cow_page: *mut page,
+    pub page: *mut page,
+    pub pte: *mut pte_t,
+    pub ptl: *mut spinlock_t,
+    pub prealloc_pte: pgtable_t,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vm_fault__bindgen_ty_1 {
+    pub vma: *mut vm_area_struct,
+    pub gfp_mask: gfp_t,
+    pub pgoff: ffi::c_ulong,
+    pub address: ffi::c_ulong,
+    pub real_address: ffi::c_ulong,
+}
+impl Default for vm_fault__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union vm_fault__bindgen_ty_2 {
+    pub orig_pte: pte_t,
+    pub orig_pmd: pmd_t,
+}
+impl Default for vm_fault__bindgen_ty_2 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for vm_fault {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct vm_operations_struct {
+    pub open: ::core::option::Option<unsafe extern "C" fn(area: *mut vm_area_struct)>,
+    pub close: ::core::option::Option<unsafe extern "C" fn(area: *mut vm_area_struct)>,
+    pub may_split: ::core::option::Option<
+        unsafe extern "C" fn(area: *mut vm_area_struct, addr: ffi::c_ulong) -> ffi::c_int,
+    >,
+    pub mremap:
+        ::core::option::Option<unsafe extern "C" fn(area: *mut vm_area_struct) -> ffi::c_int>,
+    pub mprotect: ::core::option::Option<
+        unsafe extern "C" fn(
+            vma: *mut vm_area_struct,
+            start: ffi::c_ulong,
+            end: ffi::c_ulong,
+            newflags: ffi::c_ulong,
+        ) -> ffi::c_int,
+    >,
+    pub fault: ::core::option::Option<unsafe extern "C" fn(vmf: *mut vm_fault) -> vm_fault_t>,
+    pub huge_fault: ::core::option::Option<
+        unsafe extern "C" fn(vmf: *mut vm_fault, order: ffi::c_uint) -> vm_fault_t,
+    >,
+    pub map_pages: ::core::option::Option<
+        unsafe extern "C" fn(
+            vmf: *mut vm_fault,
+            start_pgoff: ffi::c_ulong,
+            end_pgoff: ffi::c_ulong,
+        ) -> vm_fault_t,
+    >,
+    pub pagesize:
+        ::core::option::Option<unsafe extern "C" fn(area: *mut vm_area_struct) -> ffi::c_ulong>,
+    pub page_mkwrite:
+        ::core::option::Option<unsafe extern "C" fn(vmf: *mut vm_fault) -> vm_fault_t>,
+    pub pfn_mkwrite: ::core::option::Option<unsafe extern "C" fn(vmf: *mut vm_fault) -> vm_fault_t>,
+    pub access: ::core::option::Option<
+        unsafe extern "C" fn(
+            vma: *mut vm_area_struct,
+            addr: ffi::c_ulong,
+            buf: *mut ffi::c_void,
+            len: ffi::c_int,
+            write: ffi::c_int,
+        ) -> ffi::c_int,
+    >,
+    pub name: ::core::option::Option<
+        unsafe extern "C" fn(vma: *mut vm_area_struct) -> *const ffi::c_char,
+    >,
+    pub set_policy: ::core::option::Option<
+        unsafe extern "C" fn(vma: *mut vm_area_struct, new: *mut mempolicy) -> ffi::c_int,
+    >,
+    pub get_policy: ::core::option::Option<
+        unsafe extern "C" fn(
+            vma: *mut vm_area_struct,
+            addr: ffi::c_ulong,
+            ilx: *mut ffi::c_ulong,
+        ) -> *mut mempolicy,
+    >,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct idr {
+    pub idr_rt: xarray,
+    pub idr_base: ffi::c_uint,
+    pub idr_next: ffi::c_uint,
+}
+impl Default for idr {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kernfs_open_node {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kernfs_iattrs {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kernfs_elem_dir {
+    pub subdirs: ffi::c_ulong,
+    pub children: rb_root,
+    pub root: *mut kernfs_root,
+    pub rev: ffi::c_ulong,
+}
+impl Default for kernfs_elem_dir {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kernfs_elem_symlink {
+    pub target_kn: *mut kernfs_node,
+}
+impl Default for kernfs_elem_symlink {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kernfs_elem_attr {
+    pub ops: *const kernfs_ops,
+    pub open: *mut kernfs_open_node,
+    pub size: loff_t,
+    pub notify_next: *mut kernfs_node,
+}
+impl Default for kernfs_elem_attr {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct kernfs_node {
+    pub count: atomic_t,
+    pub active: atomic_t,
+    pub __parent: *mut kernfs_node,
+    pub name: *const ffi::c_char,
+    pub rb: rb_node,
+    pub ns: *const ffi::c_void,
+    pub hash: ffi::c_uint,
+    pub flags: ffi::c_ushort,
+    pub mode: umode_t,
+    pub __bindgen_anon_1: kernfs_node__bindgen_ty_1,
+    pub id: u64_,
+    pub priv_: *mut ffi::c_void,
+    pub iattr: *mut kernfs_iattrs,
+    pub rcu: callback_head,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union kernfs_node__bindgen_ty_1 {
+    pub dir: kernfs_elem_dir,
+    pub symlink: kernfs_elem_symlink,
+    pub attr: kernfs_elem_attr,
+}
+impl Default for kernfs_node__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for kernfs_node {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct kernfs_open_file {
+    pub kn: *mut kernfs_node,
+    pub file: *mut file,
+    pub seq_file: *mut seq_file,
+    pub priv_: *mut ffi::c_void,
+    pub mutex: mutex,
+    pub prealloc_mutex: mutex,
+    pub event: ffi::c_int,
+    pub list: list_head,
+    pub prealloc_buf: *mut ffi::c_char,
+    pub atomic_write_len: usize,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub vm_ops: *const vm_operations_struct,
+}
+impl Default for kernfs_open_file {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl kernfs_open_file {
+    #[inline]
+    pub fn mmapped(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_mmapped(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn mmapped_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_mmapped_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn released(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_released(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn released_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_released_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(mmapped: bool_, released: bool_) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let mmapped: u8 = unsafe { ::core::mem::transmute(mmapped) };
+            mmapped as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let released: u8 = unsafe { ::core::mem::transmute(released) };
+            released as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct kernfs_ops {
+    pub open: ::core::option::Option<unsafe extern "C" fn(of: *mut kernfs_open_file) -> ffi::c_int>,
+    pub release: ::core::option::Option<unsafe extern "C" fn(of: *mut kernfs_open_file)>,
+    pub seq_show: ::core::option::Option<
+        unsafe extern "C" fn(sf: *mut seq_file, v: *mut ffi::c_void) -> ffi::c_int,
+    >,
+    pub seq_start: ::core::option::Option<
+        unsafe extern "C" fn(sf: *mut seq_file, ppos: *mut loff_t) -> *mut ffi::c_void,
+    >,
+    pub seq_next: ::core::option::Option<
+        unsafe extern "C" fn(
+            sf: *mut seq_file,
+            v: *mut ffi::c_void,
+            ppos: *mut loff_t,
+        ) -> *mut ffi::c_void,
+    >,
+    pub seq_stop:
+        ::core::option::Option<unsafe extern "C" fn(sf: *mut seq_file, v: *mut ffi::c_void)>,
+    pub read: ::core::option::Option<
+        unsafe extern "C" fn(
+            of: *mut kernfs_open_file,
+            buf: *mut ffi::c_char,
+            bytes: usize,
+            off: loff_t,
+        ) -> isize,
+    >,
+    pub atomic_write_len: usize,
+    pub prealloc: bool_,
+    pub write: ::core::option::Option<
+        unsafe extern "C" fn(
+            of: *mut kernfs_open_file,
+            buf: *mut ffi::c_char,
+            bytes: usize,
+            off: loff_t,
+        ) -> isize,
+    >,
+    pub poll: ::core::option::Option<
+        unsafe extern "C" fn(of: *mut kernfs_open_file, pt: *mut poll_table_struct) -> __poll_t,
+    >,
+    pub mmap: ::core::option::Option<
+        unsafe extern "C" fn(of: *mut kernfs_open_file, vma: *mut vm_area_struct) -> ffi::c_int,
+    >,
+    pub llseek: ::core::option::Option<
+        unsafe extern "C" fn(
+            of: *mut kernfs_open_file,
+            offset: loff_t,
+            whence: ffi::c_int,
+        ) -> loff_t,
+    >,
+}
+unsafe extern "C" {
+    pub fn kernfs_get_inode(sb: *mut super_block, kn: *mut kernfs_node) -> *mut inode;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct sock {
+    _unused: [u8; 0],
+}
+pub const kobj_ns_type_KOBJ_NS_TYPE_NONE: kobj_ns_type = 0;
+pub const kobj_ns_type_KOBJ_NS_TYPE_NET: kobj_ns_type = 1;
+pub const kobj_ns_type_KOBJ_NS_TYPES: kobj_ns_type = 2;
+pub type kobj_ns_type = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kobj_ns_type_operations {
+    pub type_: kobj_ns_type,
+    pub current_may_mount: ::core::option::Option<unsafe extern "C" fn() -> bool_>,
+    pub grab_current_ns: ::core::option::Option<unsafe extern "C" fn() -> *mut ffi::c_void>,
+    pub netlink_ns:
+        ::core::option::Option<unsafe extern "C" fn(sk: *mut sock) -> *const ffi::c_void>,
+    pub initial_ns: ::core::option::Option<unsafe extern "C" fn() -> *const ffi::c_void>,
+    pub drop_ns: ::core::option::Option<unsafe extern "C" fn(arg1: *mut ffi::c_void)>,
+}
+impl Default for kobj_ns_type_operations {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attribute {
+    pub name: *const ffi::c_char,
+    pub mode: umode_t,
+}
+impl Default for attribute {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct attribute_group {
+    pub name: *const ffi::c_char,
+    pub is_visible: ::core::option::Option<
+        unsafe extern "C" fn(arg1: *mut kobject, arg2: *mut attribute, arg3: ffi::c_int) -> umode_t,
+    >,
+    pub is_bin_visible: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut kobject,
+            arg2: *const bin_attribute,
+            arg3: ffi::c_int,
+        ) -> umode_t,
+    >,
+    pub bin_size: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut kobject,
+            arg2: *const bin_attribute,
+            arg3: ffi::c_int,
+        ) -> usize,
+    >,
+    pub attrs: *mut *mut attribute,
+    pub bin_attrs: *const *const bin_attribute,
+}
+impl Default for attribute_group {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct bin_attribute {
+    pub attr: attribute,
+    pub size: usize,
+    pub private: *mut ffi::c_void,
+    pub f_mapping: ::core::option::Option<unsafe extern "C" fn() -> *mut address_space>,
+    pub read: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut file,
+            arg2: *mut kobject,
+            arg3: *const bin_attribute,
+            arg4: *mut ffi::c_char,
+            arg5: loff_t,
+            arg6: usize,
+        ) -> isize,
+    >,
+    pub write: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut file,
+            arg2: *mut kobject,
+            arg3: *const bin_attribute,
+            arg4: *mut ffi::c_char,
+            arg5: loff_t,
+            arg6: usize,
+        ) -> isize,
+    >,
+    pub llseek: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut file,
+            arg2: *mut kobject,
+            arg3: *const bin_attribute,
+            arg4: loff_t,
+            arg5: ffi::c_int,
+        ) -> loff_t,
+    >,
+    pub mmap: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut file,
+            arg2: *mut kobject,
+            attr: *const bin_attribute,
+            vma: *mut vm_area_struct,
+        ) -> ffi::c_int,
+    >,
+}
+impl Default for bin_attribute {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct sysfs_ops {
+    pub show: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut kobject,
+            arg2: *mut attribute,
+            arg3: *mut ffi::c_char,
+        ) -> isize,
+    >,
+    pub store: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *mut kobject,
+            arg2: *mut attribute,
+            arg3: *const ffi::c_char,
+            arg4: usize,
+        ) -> isize,
+    >,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kobject {
+    pub name: *const ffi::c_char,
+    pub entry: list_head,
+    pub parent: *mut kobject,
+    pub kset: *mut kset,
+    pub ktype: *const kobj_type,
+    pub sd: *mut kernfs_node,
+    pub kref: kref,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub __bindgen_padding_0: [u8; 3usize],
+}
+impl Default for kobject {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl kobject {
+    #[inline]
+    pub fn state_initialized(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_state_initialized(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn state_initialized_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_state_initialized_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn state_in_sysfs(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_state_in_sysfs(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn state_in_sysfs_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_state_in_sysfs_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn state_add_uevent_sent(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(2usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_state_add_uevent_sent(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn state_add_uevent_sent_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                2usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_state_add_uevent_sent_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                2usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn state_remove_uevent_sent(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(3usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_state_remove_uevent_sent(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn state_remove_uevent_sent_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                3usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_state_remove_uevent_sent_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                3usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn uevent_suppress(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(4usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_uevent_suppress(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn uevent_suppress_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                4usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_uevent_suppress_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                4usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        state_initialized: ffi::c_uint,
+        state_in_sysfs: ffi::c_uint,
+        state_add_uevent_sent: ffi::c_uint,
+        state_remove_uevent_sent: ffi::c_uint,
+        uevent_suppress: ffi::c_uint,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let state_initialized: u32 = unsafe { ::core::mem::transmute(state_initialized) };
+            state_initialized as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let state_in_sysfs: u32 = unsafe { ::core::mem::transmute(state_in_sysfs) };
+            state_in_sysfs as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let state_add_uevent_sent: u32 =
+                unsafe { ::core::mem::transmute(state_add_uevent_sent) };
+            state_add_uevent_sent as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let state_remove_uevent_sent: u32 =
+                unsafe { ::core::mem::transmute(state_remove_uevent_sent) };
+            state_remove_uevent_sent as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let uevent_suppress: u32 = unsafe { ::core::mem::transmute(uevent_suppress) };
+            uevent_suppress as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kobj_type {
+    pub release: ::core::option::Option<unsafe extern "C" fn(kobj: *mut kobject)>,
+    pub sysfs_ops: *const sysfs_ops,
+    pub default_groups: *mut *const attribute_group,
+    pub child_ns_type: ::core::option::Option<
+        unsafe extern "C" fn(kobj: *const kobject) -> *const kobj_ns_type_operations,
+    >,
+    pub namespace:
+        ::core::option::Option<unsafe extern "C" fn(kobj: *const kobject) -> *const ffi::c_void>,
+    pub get_ownership: ::core::option::Option<
+        unsafe extern "C" fn(kobj: *const kobject, uid: *mut kuid_t, gid: *mut kgid_t),
+    >,
+}
+impl Default for kobj_type {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kobj_uevent_env {
+    pub argv: [*mut ffi::c_char; 3usize],
+    pub envp: [*mut ffi::c_char; 64usize],
+    pub envp_idx: ffi::c_int,
+    pub buf: [ffi::c_char; 2048usize],
+    pub buflen: ffi::c_int,
+}
+impl Default for kobj_uevent_env {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct kset_uevent_ops {
+    pub filter: ::core::option::Option<unsafe extern "C" fn(kobj: *const kobject) -> ffi::c_int>,
+    pub name:
+        ::core::option::Option<unsafe extern "C" fn(kobj: *const kobject) -> *const ffi::c_char>,
+    pub uevent: ::core::option::Option<
+        unsafe extern "C" fn(kobj: *const kobject, env: *mut kobj_uevent_env) -> ffi::c_int,
+    >,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct kset {
+    pub list: list_head,
+    pub list_lock: spinlock_t,
+    pub kobj: kobject,
+    pub uevent_ops: *const kset_uevent_ops,
+}
+impl Default for kset {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn folio_copy(dst: *mut folio, src: *mut folio);
+}
+unsafe extern "C" {
+    pub fn folio_mc_copy(dst: *mut folio, src: *mut folio) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_access_phys(
+        vma: *mut vm_area_struct,
+        addr: ffi::c_ulong,
+        buf: *mut ffi::c_void,
+        len: ffi::c_int,
+        write: ffi::c_int,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn generic_error_remove_folio(mapping: *mut address_space, folio: *mut folio)
+    -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn folio_add_pins(folio: *mut folio, pins: ffi::c_uint) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn folio_add_pin(folio: *mut folio);
+}
+unsafe extern "C" {
+    pub fn folio_mark_dirty(folio: *mut folio) -> bool_;
+}
+unsafe extern "C" {
+    pub fn folio_mark_dirty_lock(folio: *mut folio) -> bool_;
+}
+unsafe extern "C" {
+    pub fn folio_zero_user(folio: *mut folio, addr_hint: ffi::c_ulong);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct latch_tree_node {
+    pub node: [rb_node; 2usize],
+}
+impl Default for latch_tree_node {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct iovec {
+    pub iov_base: *mut ffi::c_void,
+    pub iov_len: __kernel_size_t,
+}
+impl Default for iovec {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct folio_queue {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kvec {
+    pub iov_base: *mut ffi::c_void,
+    pub iov_len: usize,
+}
+impl Default for kvec {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct iov_iter {
+    pub iter_type: u8_,
+    pub nofault: bool_,
+    pub data_source: bool_,
+    pub iov_offset: usize,
+    pub __bindgen_anon_1: iov_iter__bindgen_ty_1,
+    pub __bindgen_anon_2: iov_iter__bindgen_ty_2,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union iov_iter__bindgen_ty_1 {
+    pub __ubuf_iovec: iovec,
+    pub __bindgen_anon_1: iov_iter__bindgen_ty_1__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct iov_iter__bindgen_ty_1__bindgen_ty_1 {
+    pub __bindgen_anon_1: iov_iter__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1,
+    pub count: usize,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union iov_iter__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1 {
+    pub __iov: *const iovec,
+    pub kvec: *const kvec,
+    pub bvec: *const bio_vec,
+    pub folioq: *const folio_queue,
+    pub xarray: *mut xarray,
+    pub ubuf: *mut ffi::c_void,
+}
+impl Default for iov_iter__bindgen_ty_1__bindgen_ty_1__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for iov_iter__bindgen_ty_1__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for iov_iter__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union iov_iter__bindgen_ty_2 {
+    pub nr_segs: ffi::c_ulong,
+    pub folioq_slot: u8_,
+    pub xarray_start: loff_t,
+}
+impl Default for iov_iter__bindgen_ty_2 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for iov_iter {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type compat_long_t = s32;
+pub type compat_uptr_t = u32_;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct compat_robust_list {
+    pub next: compat_uptr_t,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct compat_robust_list_head {
+    pub list: compat_robust_list,
+    pub futex_offset: compat_long_t,
+    pub list_op_pending: compat_uptr_t,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct vdso_image {
+    pub data: *mut ffi::c_void,
+    pub size: ffi::c_ulong,
+    pub alt: ffi::c_ulong,
+    pub alt_len: ffi::c_ulong,
+    pub extable_base: ffi::c_ulong,
+    pub extable_len: ffi::c_ulong,
+    pub extable: *const ffi::c_void,
+    pub sym_VDSO32_NOTE_MASK: ffi::c_long,
+    pub sym___kernel_sigreturn: ffi::c_long,
+    pub sym___kernel_rt_sigreturn: ffi::c_long,
+    pub sym___kernel_vsyscall: ffi::c_long,
+    pub sym_int80_landing_pad: ffi::c_long,
+    pub sym_vdso32_sigreturn_landing_pad: ffi::c_long,
+    pub sym_vdso32_rt_sigreturn_landing_pad: ffi::c_long,
+}
+impl Default for vdso_image {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub type Elf64_Addr = __u64;
+pub type Elf64_Half = __u16;
+pub type Elf64_Word = __u32;
+pub type Elf64_Xword = __u64;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct elf64_sym {
+    pub st_name: Elf64_Word,
+    pub st_info: ffi::c_uchar,
+    pub st_other: ffi::c_uchar,
+    pub st_shndx: Elf64_Half,
+    pub st_value: Elf64_Addr,
+    pub st_size: Elf64_Xword,
+}
+pub type Elf64_Sym = elf64_sym;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct kernel_param_ops {
+    pub flags: ffi::c_uint,
+    pub set: ::core::option::Option<
+        unsafe extern "C" fn(val: *const ffi::c_char, kp: *const kernel_param) -> ffi::c_int,
+    >,
+    pub get: ::core::option::Option<
+        unsafe extern "C" fn(buffer: *mut ffi::c_char, kp: *const kernel_param) -> ffi::c_int,
+    >,
+    pub free: ::core::option::Option<unsafe extern "C" fn(arg: *mut ffi::c_void)>,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct kernel_param {
+    pub name: *const ffi::c_char,
+    pub mod_: *mut module,
+    pub ops: *const kernel_param_ops,
+    pub perm: u16_,
+    pub level: s8,
+    pub flags: u8_,
+    pub __bindgen_anon_1: kernel_param__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union kernel_param__bindgen_ty_1 {
+    pub arg: *mut ffi::c_void,
+    pub str_: *const kparam_string,
+    pub arr: *const kparam_array,
+}
+impl Default for kernel_param__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for kernel_param {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kparam_string {
+    pub maxlen: ffi::c_uint,
+    pub string: *mut ffi::c_char,
+}
+impl Default for kparam_string {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kparam_array {
+    pub max: ffi::c_uint,
+    pub elemsize: ffi::c_uint,
+    pub num: *mut ffi::c_uint,
+    pub ops: *const kernel_param_ops,
+    pub elem: *mut ffi::c_void,
+}
+impl Default for kparam_array {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct its_array {
+    pub pages: *mut *mut ffi::c_void,
+    pub num: ffi::c_int,
+}
+impl Default for its_array {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mod_arch_specific {
+    pub num_orcs: ffi::c_uint,
+    pub orc_unwind_ip: *mut ffi::c_int,
+    pub orc_unwind: *mut orc_entry,
+    pub its_pages: its_array,
+}
+impl Default for mod_arch_specific {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct module_kobject {
+    pub kobj: kobject,
+    pub mod_: *mut module,
+    pub drivers_dir: *mut kobject,
+    pub mp: *mut module_param_attrs,
+    pub kobj_completion: *mut completion,
+}
+impl Default for module_kobject {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct module_attribute {
+    pub attr: attribute,
+    pub show: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *const module_attribute,
+            arg2: *mut module_kobject,
+            arg3: *mut ffi::c_char,
+        ) -> isize,
+    >,
+    pub store: ::core::option::Option<
+        unsafe extern "C" fn(
+            arg1: *const module_attribute,
+            arg2: *mut module_kobject,
+            arg3: *const ffi::c_char,
+            count: usize,
+        ) -> isize,
+    >,
+    pub setup:
+        ::core::option::Option<unsafe extern "C" fn(arg1: *mut module, arg2: *const ffi::c_char)>,
+    pub test: ::core::option::Option<unsafe extern "C" fn(arg1: *mut module) -> ffi::c_int>,
+    pub free: ::core::option::Option<unsafe extern "C" fn(arg1: *mut module)>,
+}
+impl Default for module_attribute {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const module_state_MODULE_STATE_LIVE: module_state = 0;
+pub const module_state_MODULE_STATE_COMING: module_state = 1;
+pub const module_state_MODULE_STATE_GOING: module_state = 2;
+pub const module_state_MODULE_STATE_UNFORMED: module_state = 3;
+pub type module_state = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mod_tree_node {
+    pub mod_: *mut module,
+    pub node: latch_tree_node,
+}
+impl Default for mod_tree_node {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct module_memory {
+    pub base: *mut ffi::c_void,
+    pub is_rox: bool_,
+    pub size: ffi::c_uint,
+    pub mtn: mod_tree_node,
+}
+impl Default for module_memory {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mod_kallsyms {
+    pub symtab: *mut Elf64_Sym,
+    pub num_symtab: ffi::c_uint,
+    pub strtab: *mut ffi::c_char,
+    pub typetab: *mut ffi::c_char,
+}
+impl Default for mod_kallsyms {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct pm_message {
+    pub event: ffi::c_int,
+}
+pub type pm_message_t = pm_message;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct dev_pm_ops {
+    pub prepare: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub complete: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub suspend: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub resume: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub freeze: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub thaw: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub poweroff: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub restore: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub suspend_late: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub resume_early: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub freeze_late: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub thaw_early: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub poweroff_late: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub restore_early: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub suspend_noirq: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub resume_noirq: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub freeze_noirq: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub thaw_noirq: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub poweroff_noirq:
+        ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub restore_noirq: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub runtime_suspend:
+        ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub runtime_resume:
+        ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub runtime_idle: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+}
+pub const rpm_status_RPM_INVALID: rpm_status = -1;
+pub const rpm_status_RPM_ACTIVE: rpm_status = 0;
+pub const rpm_status_RPM_RESUMING: rpm_status = 1;
+pub const rpm_status_RPM_SUSPENDED: rpm_status = 2;
+pub const rpm_status_RPM_SUSPENDING: rpm_status = 3;
+pub const rpm_status_RPM_BLOCKED: rpm_status = 4;
+pub type rpm_status = ffi::c_int;
+pub const rpm_request_RPM_REQ_NONE: rpm_request = 0;
+pub const rpm_request_RPM_REQ_IDLE: rpm_request = 1;
+pub const rpm_request_RPM_REQ_SUSPEND: rpm_request = 2;
+pub const rpm_request_RPM_REQ_AUTOSUSPEND: rpm_request = 3;
+pub const rpm_request_RPM_REQ_RESUME: rpm_request = 4;
+pub type rpm_request = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct wake_irq {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct pm_subsys_data {
+    pub lock: spinlock_t,
+    pub refcount: ffi::c_uint,
+}
+impl Default for pm_subsys_data {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct dev_pm_info {
+    pub power_state: pm_message_t,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 2usize]>,
+    pub driver_flags: u32_,
+    pub lock: spinlock_t,
+    pub entry: list_head,
+    pub completion: completion,
+    pub wakeup: *mut wakeup_source,
+    pub _bitfield_align_2: [u8; 0],
+    pub _bitfield_2: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub suspend_timer: hrtimer,
+    pub timer_expires: u64_,
+    pub work: work_struct,
+    pub wait_queue: wait_queue_head_t,
+    pub wakeirq: *mut wake_irq,
+    pub usage_count: atomic_t,
+    pub child_count: atomic_t,
+    pub _bitfield_align_3: [u8; 0],
+    pub _bitfield_3: __BindgenBitfieldUnit<[u8; 2usize]>,
+    pub links_count: ffi::c_uint,
+    pub request: rpm_request,
+    pub runtime_status: rpm_status,
+    pub last_status: rpm_status,
+    pub runtime_error: ffi::c_int,
+    pub autosuspend_delay: ffi::c_int,
+    pub last_busy: u64_,
+    pub active_time: u64_,
+    pub suspended_time: u64_,
+    pub accounting_timestamp: u64_,
+    pub subsys_data: *mut pm_subsys_data,
+    pub set_latency_tolerance:
+        ::core::option::Option<unsafe extern "C" fn(arg1: *mut device, arg2: s32)>,
+    pub qos: *mut dev_pm_qos,
+    pub _bitfield_align_4: [u8; 0],
+    pub _bitfield_4: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub __bindgen_padding_0: [u8; 7usize],
+}
+impl Default for dev_pm_info {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl dev_pm_info {
+    #[inline]
+    pub fn can_wakeup(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_can_wakeup(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn can_wakeup_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_can_wakeup_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn async_suspend(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_async_suspend(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn async_suspend_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_async_suspend_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn in_dpm_list(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(2usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_in_dpm_list(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn in_dpm_list_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                2usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_in_dpm_list_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                2usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn is_prepared(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(3usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_is_prepared(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn is_prepared_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                3usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_is_prepared_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                3usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn is_suspended(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(4usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_is_suspended(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn is_suspended_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                4usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_is_suspended_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                4usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn is_noirq_suspended(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(5usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_is_noirq_suspended(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(5usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn is_noirq_suspended_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                5usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_is_noirq_suspended_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                5usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn is_late_suspended(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(6usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_is_late_suspended(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(6usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn is_late_suspended_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                6usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_is_late_suspended_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                6usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn no_pm(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(7usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_no_pm(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(7usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn no_pm_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                7usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_no_pm_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                7usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn early_init(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(8usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_early_init(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(8usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn early_init_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                8usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_early_init_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                8usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn direct_complete(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(9usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_direct_complete(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(9usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn direct_complete_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                9usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_direct_complete_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                9usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        can_wakeup: bool_,
+        async_suspend: bool_,
+        in_dpm_list: bool_,
+        is_prepared: bool_,
+        is_suspended: bool_,
+        is_noirq_suspended: bool_,
+        is_late_suspended: bool_,
+        no_pm: bool_,
+        early_init: bool_,
+        direct_complete: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 2usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 2usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let can_wakeup: u8 = unsafe { ::core::mem::transmute(can_wakeup) };
+            can_wakeup as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let async_suspend: u8 = unsafe { ::core::mem::transmute(async_suspend) };
+            async_suspend as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let in_dpm_list: u8 = unsafe { ::core::mem::transmute(in_dpm_list) };
+            in_dpm_list as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let is_prepared: u8 = unsafe { ::core::mem::transmute(is_prepared) };
+            is_prepared as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let is_suspended: u8 = unsafe { ::core::mem::transmute(is_suspended) };
+            is_suspended as u64
+        });
+        __bindgen_bitfield_unit.set(5usize, 1u8, {
+            let is_noirq_suspended: u8 = unsafe { ::core::mem::transmute(is_noirq_suspended) };
+            is_noirq_suspended as u64
+        });
+        __bindgen_bitfield_unit.set(6usize, 1u8, {
+            let is_late_suspended: u8 = unsafe { ::core::mem::transmute(is_late_suspended) };
+            is_late_suspended as u64
+        });
+        __bindgen_bitfield_unit.set(7usize, 1u8, {
+            let no_pm: u8 = unsafe { ::core::mem::transmute(no_pm) };
+            no_pm as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 1u8, {
+            let early_init: u8 = unsafe { ::core::mem::transmute(early_init) };
+            early_init as u64
+        });
+        __bindgen_bitfield_unit.set(9usize, 1u8, {
+            let direct_complete: u8 = unsafe { ::core::mem::transmute(direct_complete) };
+            direct_complete as u64
+        });
+        __bindgen_bitfield_unit
+    }
+    #[inline]
+    pub fn wakeup_path(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_wakeup_path(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn wakeup_path_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_wakeup_path_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn syscore(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_syscore(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn syscore_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_syscore_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn no_pm_callbacks(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(2usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_no_pm_callbacks(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn no_pm_callbacks_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                2usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_no_pm_callbacks_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                2usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn work_in_progress(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(3usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_work_in_progress(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn work_in_progress_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                3usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_work_in_progress_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                3usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn smart_suspend(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(4usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_smart_suspend(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn smart_suspend_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                4usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_smart_suspend_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                4usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn must_resume(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(5usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_must_resume(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(5usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn must_resume_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                5usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_must_resume_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                5usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn may_skip_resume(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(6usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_may_skip_resume(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(6usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn may_skip_resume_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                6usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_may_skip_resume_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                6usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn strict_midlayer(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_2.get(7usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_strict_midlayer(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_2.set(7usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn strict_midlayer_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_2),
+                7usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_strict_midlayer_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_2),
+                7usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_2(
+        wakeup_path: bool_,
+        syscore: bool_,
+        no_pm_callbacks: bool_,
+        work_in_progress: bool_,
+        smart_suspend: bool_,
+        must_resume: bool_,
+        may_skip_resume: bool_,
+        strict_midlayer: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let wakeup_path: u8 = unsafe { ::core::mem::transmute(wakeup_path) };
+            wakeup_path as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let syscore: u8 = unsafe { ::core::mem::transmute(syscore) };
+            syscore as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let no_pm_callbacks: u8 = unsafe { ::core::mem::transmute(no_pm_callbacks) };
+            no_pm_callbacks as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let work_in_progress: u8 = unsafe { ::core::mem::transmute(work_in_progress) };
+            work_in_progress as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let smart_suspend: u8 = unsafe { ::core::mem::transmute(smart_suspend) };
+            smart_suspend as u64
+        });
+        __bindgen_bitfield_unit.set(5usize, 1u8, {
+            let must_resume: u8 = unsafe { ::core::mem::transmute(must_resume) };
+            must_resume as u64
+        });
+        __bindgen_bitfield_unit.set(6usize, 1u8, {
+            let may_skip_resume: u8 = unsafe { ::core::mem::transmute(may_skip_resume) };
+            may_skip_resume as u64
+        });
+        __bindgen_bitfield_unit.set(7usize, 1u8, {
+            let strict_midlayer: u8 = unsafe { ::core::mem::transmute(strict_midlayer) };
+            strict_midlayer as u64
+        });
+        __bindgen_bitfield_unit
+    }
+    #[inline]
+    pub fn disable_depth(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(0usize, 3u8) as u32) }
+    }
+    #[inline]
+    pub fn set_disable_depth(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_3.set(0usize, 3u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn disable_depth_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                0usize,
+                3u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_disable_depth_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                0usize,
+                3u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn idle_notification(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(3usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_idle_notification(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn idle_notification_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                3usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_idle_notification_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                3usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn request_pending(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(4usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_request_pending(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn request_pending_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                4usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_request_pending_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                4usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn deferred_resume(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(5usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_deferred_resume(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(5usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn deferred_resume_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                5usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_deferred_resume_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                5usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn needs_force_resume(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(6usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_needs_force_resume(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(6usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn needs_force_resume_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                6usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_needs_force_resume_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                6usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn runtime_auto(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(7usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_runtime_auto(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(7usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn runtime_auto_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                7usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_runtime_auto_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                7usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn ignore_children(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(8usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_ignore_children(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(8usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn ignore_children_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                8usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_ignore_children_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                8usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn no_callbacks(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(9usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_no_callbacks(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(9usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn no_callbacks_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                9usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_no_callbacks_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                9usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn irq_safe(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(10usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_irq_safe(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(10usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn irq_safe_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                10usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_irq_safe_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                10usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn use_autosuspend(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(11usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_use_autosuspend(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(11usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn use_autosuspend_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                11usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_use_autosuspend_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                11usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn timer_autosuspends(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(12usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_timer_autosuspends(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(12usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn timer_autosuspends_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                12usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_timer_autosuspends_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                12usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn memalloc_noio(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_3.get(13usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_memalloc_noio(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_3.set(13usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn memalloc_noio_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 2usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_3),
+                13usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_memalloc_noio_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 2usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_3),
+                13usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_3(
+        disable_depth: ffi::c_uint,
+        idle_notification: bool_,
+        request_pending: bool_,
+        deferred_resume: bool_,
+        needs_force_resume: bool_,
+        runtime_auto: bool_,
+        ignore_children: bool_,
+        no_callbacks: bool_,
+        irq_safe: bool_,
+        use_autosuspend: bool_,
+        timer_autosuspends: bool_,
+        memalloc_noio: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 2usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 2usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 3u8, {
+            let disable_depth: u32 = unsafe { ::core::mem::transmute(disable_depth) };
+            disable_depth as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let idle_notification: u8 = unsafe { ::core::mem::transmute(idle_notification) };
+            idle_notification as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let request_pending: u8 = unsafe { ::core::mem::transmute(request_pending) };
+            request_pending as u64
+        });
+        __bindgen_bitfield_unit.set(5usize, 1u8, {
+            let deferred_resume: u8 = unsafe { ::core::mem::transmute(deferred_resume) };
+            deferred_resume as u64
+        });
+        __bindgen_bitfield_unit.set(6usize, 1u8, {
+            let needs_force_resume: u8 = unsafe { ::core::mem::transmute(needs_force_resume) };
+            needs_force_resume as u64
+        });
+        __bindgen_bitfield_unit.set(7usize, 1u8, {
+            let runtime_auto: u8 = unsafe { ::core::mem::transmute(runtime_auto) };
+            runtime_auto as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 1u8, {
+            let ignore_children: u8 = unsafe { ::core::mem::transmute(ignore_children) };
+            ignore_children as u64
+        });
+        __bindgen_bitfield_unit.set(9usize, 1u8, {
+            let no_callbacks: u8 = unsafe { ::core::mem::transmute(no_callbacks) };
+            no_callbacks as u64
+        });
+        __bindgen_bitfield_unit.set(10usize, 1u8, {
+            let irq_safe: u8 = unsafe { ::core::mem::transmute(irq_safe) };
+            irq_safe as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 1u8, {
+            let use_autosuspend: u8 = unsafe { ::core::mem::transmute(use_autosuspend) };
+            use_autosuspend as u64
+        });
+        __bindgen_bitfield_unit.set(12usize, 1u8, {
+            let timer_autosuspends: u8 = unsafe { ::core::mem::transmute(timer_autosuspends) };
+            timer_autosuspends as u64
+        });
+        __bindgen_bitfield_unit.set(13usize, 1u8, {
+            let memalloc_noio: u8 = unsafe { ::core::mem::transmute(memalloc_noio) };
+            memalloc_noio as u64
+        });
+        __bindgen_bitfield_unit
+    }
+    #[inline]
+    pub fn detach_power_off(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_4.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_detach_power_off(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_4.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn detach_power_off_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_4),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_detach_power_off_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_4),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_4(detach_power_off: bool_) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let detach_power_off: u8 = unsafe { ::core::mem::transmute(detach_power_off) };
+            detach_power_off as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct dev_pm_domain {
+    pub ops: dev_pm_ops,
+    pub start: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub detach: ::core::option::Option<unsafe extern "C" fn(dev: *mut device, power_off: bool_)>,
+    pub activate: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub sync: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub dismiss: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub set_performance_state: ::core::option::Option<
+        unsafe extern "C" fn(dev: *mut device, state: ffi::c_uint) -> ffi::c_int,
+    >,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct fwnode_handle {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct bus_type {
+    pub name: *const ffi::c_char,
+    pub dev_name: *const ffi::c_char,
+    pub bus_groups: *mut *const attribute_group,
+    pub dev_groups: *mut *const attribute_group,
+    pub drv_groups: *mut *const attribute_group,
+    pub match_: ::core::option::Option<
+        unsafe extern "C" fn(dev: *mut device, drv: *const device_driver) -> ffi::c_int,
+    >,
+    pub uevent: ::core::option::Option<
+        unsafe extern "C" fn(dev: *const device, env: *mut kobj_uevent_env) -> ffi::c_int,
+    >,
+    pub probe: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub sync_state: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub remove: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub shutdown: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub irq_get_affinity: ::core::option::Option<
+        unsafe extern "C" fn(dev: *mut device, irq_vec: ffi::c_uint) -> *const cpumask,
+    >,
+    pub online: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub offline: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub suspend: ::core::option::Option<
+        unsafe extern "C" fn(dev: *mut device, state: pm_message_t) -> ffi::c_int,
+    >,
+    pub resume: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub num_vf: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub dma_configure: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub dma_cleanup: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub pm: *const dev_pm_ops,
+    pub need_parent_lock: bool_,
+}
+impl Default for bus_type {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct class {
+    pub name: *const ffi::c_char,
+    pub class_groups: *mut *const attribute_group,
+    pub dev_groups: *mut *const attribute_group,
+    pub dev_uevent: ::core::option::Option<
+        unsafe extern "C" fn(dev: *const device, env: *mut kobj_uevent_env) -> ffi::c_int,
+    >,
+    pub devnode: ::core::option::Option<
+        unsafe extern "C" fn(dev: *const device, mode: *mut umode_t) -> *mut ffi::c_char,
+    >,
+    pub class_release: ::core::option::Option<unsafe extern "C" fn(class: *const class)>,
+    pub dev_release: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub shutdown_pre: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub ns_type: *const kobj_ns_type_operations,
+    pub namespace:
+        ::core::option::Option<unsafe extern "C" fn(dev: *const device) -> *const ffi::c_void>,
+    pub get_ownership: ::core::option::Option<
+        unsafe extern "C" fn(dev: *const device, uid: *mut kuid_t, gid: *mut kgid_t),
+    >,
+    pub pm: *const dev_pm_ops,
+}
+impl Default for class {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const probe_type_PROBE_DEFAULT_STRATEGY: probe_type = 0;
+pub const probe_type_PROBE_PREFER_ASYNCHRONOUS: probe_type = 1;
+pub const probe_type_PROBE_FORCE_SYNCHRONOUS: probe_type = 2;
+pub type probe_type = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct device_driver {
+    pub name: *const ffi::c_char,
+    pub bus: *const bus_type,
+    pub owner: *mut module,
+    pub mod_name: *const ffi::c_char,
+    pub suppress_bind_attrs: bool_,
+    pub probe_type: probe_type,
+    pub of_match_table: *mut of_device_id,
+    pub acpi_match_table: *mut acpi_device_id,
+    pub probe: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub sync_state: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub remove: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub shutdown: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub suspend: ::core::option::Option<
+        unsafe extern "C" fn(dev: *mut device, state: pm_message_t) -> ffi::c_int,
+    >,
+    pub resume: ::core::option::Option<unsafe extern "C" fn(dev: *mut device) -> ffi::c_int>,
+    pub groups: *mut *const attribute_group,
+    pub dev_groups: *mut *const attribute_group,
+    pub pm: *const dev_pm_ops,
+    pub coredump: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub p: *mut driver_private,
+}
+impl Default for device_driver {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct dev_archdata {}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct device_private {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct driver_private {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct iommu_group {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct dev_iommu {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct msi_device_data {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct device_type {
+    pub name: *const ffi::c_char,
+    pub groups: *mut *const attribute_group,
+    pub uevent: ::core::option::Option<
+        unsafe extern "C" fn(dev: *const device, env: *mut kobj_uevent_env) -> ffi::c_int,
+    >,
+    pub devnode: ::core::option::Option<
+        unsafe extern "C" fn(
+            dev: *const device,
+            mode: *mut umode_t,
+            uid: *mut kuid_t,
+            gid: *mut kgid_t,
+        ) -> *mut ffi::c_char,
+    >,
+    pub release: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub pm: *const dev_pm_ops,
+}
+impl Default for device_type {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct device_dma_parameters {
+    pub max_segment_size: ffi::c_uint,
+    pub min_align_mask: ffi::c_uint,
+    pub segment_boundary_mask: ffi::c_ulong,
+}
+pub const dl_dev_state_DL_DEV_NO_DRIVER: dl_dev_state = 0;
+pub const dl_dev_state_DL_DEV_PROBING: dl_dev_state = 1;
+pub const dl_dev_state_DL_DEV_DRIVER_BOUND: dl_dev_state = 2;
+pub const dl_dev_state_DL_DEV_UNBINDING: dl_dev_state = 3;
+pub type dl_dev_state = ffi::c_uint;
+pub const device_removable_DEVICE_REMOVABLE_NOT_SUPPORTED: device_removable = 0;
+pub const device_removable_DEVICE_REMOVABLE_UNKNOWN: device_removable = 1;
+pub const device_removable_DEVICE_FIXED: device_removable = 2;
+pub const device_removable_DEVICE_REMOVABLE: device_removable = 3;
+pub type device_removable = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct dev_links_info {
+    pub suppliers: list_head,
+    pub consumers: list_head,
+    pub defer_sync: list_head,
+    pub status: dl_dev_state,
+}
+impl Default for dev_links_info {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct dev_msi_info {
+    pub domain: *mut irq_domain,
+    pub data: *mut msi_device_data,
+}
+impl Default for dev_msi_info {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const device_physical_location_panel_DEVICE_PANEL_TOP: device_physical_location_panel = 0;
+pub const device_physical_location_panel_DEVICE_PANEL_BOTTOM: device_physical_location_panel = 1;
+pub const device_physical_location_panel_DEVICE_PANEL_LEFT: device_physical_location_panel = 2;
+pub const device_physical_location_panel_DEVICE_PANEL_RIGHT: device_physical_location_panel = 3;
+pub const device_physical_location_panel_DEVICE_PANEL_FRONT: device_physical_location_panel = 4;
+pub const device_physical_location_panel_DEVICE_PANEL_BACK: device_physical_location_panel = 5;
+pub const device_physical_location_panel_DEVICE_PANEL_UNKNOWN: device_physical_location_panel = 6;
+pub type device_physical_location_panel = ffi::c_uint;
+pub const device_physical_location_vertical_position_DEVICE_VERT_POS_UPPER:
+    device_physical_location_vertical_position = 0;
+pub const device_physical_location_vertical_position_DEVICE_VERT_POS_CENTER:
+    device_physical_location_vertical_position = 1;
+pub const device_physical_location_vertical_position_DEVICE_VERT_POS_LOWER:
+    device_physical_location_vertical_position = 2;
+pub type device_physical_location_vertical_position = ffi::c_uint;
+pub const device_physical_location_horizontal_position_DEVICE_HORI_POS_LEFT:
+    device_physical_location_horizontal_position = 0;
+pub const device_physical_location_horizontal_position_DEVICE_HORI_POS_CENTER:
+    device_physical_location_horizontal_position = 1;
+pub const device_physical_location_horizontal_position_DEVICE_HORI_POS_RIGHT:
+    device_physical_location_horizontal_position = 2;
+pub type device_physical_location_horizontal_position = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct device_physical_location {
+    pub panel: device_physical_location_panel,
+    pub vertical_position: device_physical_location_vertical_position,
+    pub horizontal_position: device_physical_location_horizontal_position,
+    pub dock: bool_,
+    pub lid: bool_,
+}
+impl Default for device_physical_location {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct device {
+    pub kobj: kobject,
+    pub parent: *mut device,
+    pub p: *mut device_private,
+    pub init_name: *const ffi::c_char,
+    pub type_: *const device_type,
+    pub bus: *const bus_type,
+    pub driver: *mut device_driver,
+    pub platform_data: *mut ffi::c_void,
+    pub driver_data: *mut ffi::c_void,
+    pub mutex: mutex,
+    pub links: dev_links_info,
+    pub power: dev_pm_info,
+    pub pm_domain: *mut dev_pm_domain,
+    pub msi: dev_msi_info,
+    pub dma_mask: *mut u64_,
+    pub coherent_dma_mask: u64_,
+    pub bus_dma_limit: u64_,
+    pub dma_range_map: *mut bus_dma_region,
+    pub dma_parms: *mut device_dma_parameters,
+    pub dma_pools: list_head,
+    pub dma_io_tlb_mem: *mut io_tlb_mem,
+    pub archdata: dev_archdata,
+    pub of_node: *mut device_node,
+    pub fwnode: *mut fwnode_handle,
+    pub numa_node: ffi::c_int,
+    pub devt: dev_t,
+    pub id: u32_,
+    pub devres_lock: spinlock_t,
+    pub devres_head: list_head,
+    pub class: *const class,
+    pub groups: *mut *const attribute_group,
+    pub release: ::core::option::Option<unsafe extern "C" fn(dev: *mut device)>,
+    pub iommu_group: *mut iommu_group,
+    pub iommu: *mut dev_iommu,
+    pub physical_location: *mut device_physical_location,
+    pub removable: device_removable,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub __bindgen_padding_0: [u8; 3usize],
+}
+impl Default for device {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl device {
+    #[inline]
+    pub fn offline_disabled(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_offline_disabled(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn offline_disabled_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_offline_disabled_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn offline(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_offline(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn offline_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_offline_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn of_node_reused(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(2usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_of_node_reused(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn of_node_reused_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                2usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_of_node_reused_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                2usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn state_synced(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(3usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_state_synced(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn state_synced_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                3usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_state_synced_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                3usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn can_match(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(4usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_can_match(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn can_match_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                4usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_can_match_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                4usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn dma_skip_sync(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(5usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_dma_skip_sync(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(5usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn dma_skip_sync_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                5usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_dma_skip_sync_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                5usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn dma_iommu(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(6usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_dma_iommu(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(6usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn dma_iommu_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                6usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_dma_iommu_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                6usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        offline_disabled: bool_,
+        offline: bool_,
+        of_node_reused: bool_,
+        state_synced: bool_,
+        can_match: bool_,
+        dma_skip_sync: bool_,
+        dma_iommu: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let offline_disabled: u8 = unsafe { ::core::mem::transmute(offline_disabled) };
+            offline_disabled as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let offline: u8 = unsafe { ::core::mem::transmute(offline) };
+            offline as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let of_node_reused: u8 = unsafe { ::core::mem::transmute(of_node_reused) };
+            of_node_reused as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let state_synced: u8 = unsafe { ::core::mem::transmute(state_synced) };
+            state_synced as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let can_match: u8 = unsafe { ::core::mem::transmute(can_match) };
+            can_match as u64
+        });
+        __bindgen_bitfield_unit.set(5usize, 1u8, {
+            let dma_skip_sync: u8 = unsafe { ::core::mem::transmute(dma_skip_sync) };
+            dma_skip_sync as u64
+        });
+        __bindgen_bitfield_unit.set(6usize, 1u8, {
+            let dma_iommu: u8 = unsafe { ::core::mem::transmute(dma_iommu) };
+            dma_iommu as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct wakeup_source {
+    pub name: *const ffi::c_char,
+    pub id: ffi::c_int,
+    pub entry: list_head,
+    pub lock: spinlock_t,
+    pub wakeirq: *mut wake_irq,
+    pub timer: timer_list,
+    pub timer_expires: ffi::c_ulong,
+    pub total_time: ktime_t,
+    pub max_time: ktime_t,
+    pub last_time: ktime_t,
+    pub start_prevent_time: ktime_t,
+    pub prevent_sleep_time: ktime_t,
+    pub event_count: ffi::c_ulong,
+    pub active_count: ffi::c_ulong,
+    pub relax_count: ffi::c_ulong,
+    pub expire_count: ffi::c_ulong,
+    pub wakeup_count: ffi::c_ulong,
+    pub dev: *mut device,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub __bindgen_padding_0: [u8; 7usize],
+}
+impl Default for wakeup_source {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl wakeup_source {
+    #[inline]
+    pub fn active(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_active(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn active_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_active_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn autosleep_enabled(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_autosleep_enabled(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn autosleep_enabled_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_autosleep_enabled_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        active: bool_,
+        autosleep_enabled: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let active: u8 = unsafe { ::core::mem::transmute(active) };
+            active as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let autosleep_enabled: u8 = unsafe { ::core::mem::transmute(autosleep_enabled) };
+            autosleep_enabled as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct taskstats {
+    pub version: __u16,
+    pub ac_exitcode: __u32,
+    pub ac_flag: __u8,
+    pub ac_nice: __u8,
+    pub cpu_count: __u64,
+    pub cpu_delay_total: __u64,
+    pub blkio_count: __u64,
+    pub blkio_delay_total: __u64,
+    pub swapin_count: __u64,
+    pub swapin_delay_total: __u64,
+    pub cpu_run_real_total: __u64,
+    pub cpu_run_virtual_total: __u64,
+    pub ac_comm: [ffi::c_char; 32usize],
+    pub ac_sched: __u8,
+    pub ac_pad: [__u8; 3usize],
+    pub __bindgen_padding_0: u32,
+    pub ac_uid: __u32,
+    pub ac_gid: __u32,
+    pub ac_pid: __u32,
+    pub ac_ppid: __u32,
+    pub ac_btime: __u32,
+    pub ac_etime: __u64,
+    pub ac_utime: __u64,
+    pub ac_stime: __u64,
+    pub ac_minflt: __u64,
+    pub ac_majflt: __u64,
+    pub coremem: __u64,
+    pub virtmem: __u64,
+    pub hiwater_rss: __u64,
+    pub hiwater_vm: __u64,
+    pub read_char: __u64,
+    pub write_char: __u64,
+    pub read_syscalls: __u64,
+    pub write_syscalls: __u64,
+    pub read_bytes: __u64,
+    pub write_bytes: __u64,
+    pub cancelled_write_bytes: __u64,
+    pub nvcsw: __u64,
+    pub nivcsw: __u64,
+    pub ac_utimescaled: __u64,
+    pub ac_stimescaled: __u64,
+    pub cpu_scaled_run_real_total: __u64,
+    pub freepages_count: __u64,
+    pub freepages_delay_total: __u64,
+    pub thrashing_count: __u64,
+    pub thrashing_delay_total: __u64,
+    pub ac_btime64: __u64,
+    pub compact_count: __u64,
+    pub compact_delay_total: __u64,
+    pub ac_tgid: __u32,
+    pub ac_tgetime: __u64,
+    pub ac_exe_dev: __u64,
+    pub ac_exe_inode: __u64,
+    pub wpcopy_count: __u64,
+    pub wpcopy_delay_total: __u64,
+    pub irq_count: __u64,
+    pub irq_delay_total: __u64,
+    pub cpu_delay_max: __u64,
+    pub cpu_delay_min: __u64,
+    pub blkio_delay_max: __u64,
+    pub blkio_delay_min: __u64,
+    pub swapin_delay_max: __u64,
+    pub swapin_delay_min: __u64,
+    pub freepages_delay_max: __u64,
+    pub freepages_delay_min: __u64,
+    pub thrashing_delay_max: __u64,
+    pub thrashing_delay_min: __u64,
+    pub compact_delay_max: __u64,
+    pub compact_delay_min: __u64,
+    pub wpcopy_delay_max: __u64,
+    pub wpcopy_delay_min: __u64,
+    pub irq_delay_max: __u64,
+    pub irq_delay_min: __u64,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct seq_file {
+    pub buf: *mut ffi::c_char,
+    pub size: usize,
+    pub from: usize,
+    pub count: usize,
+    pub pad_until: usize,
+    pub index: loff_t,
+    pub read_pos: loff_t,
+    pub lock: mutex,
+    pub op: *const seq_operations,
+    pub poll_event: ffi::c_int,
+    pub file: *const file,
+    pub private: *mut ffi::c_void,
+}
+impl Default for seq_file {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct proc_ns_operations {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ipc_namespace {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mnt_namespace {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct time_namespace {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct uts_namespace {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct cgroup_namespace {
+    pub ns: ns_common,
+    pub user_ns: *mut user_namespace,
+    pub ucounts: *mut ucounts,
+    pub root_cset: *mut css_set,
+}
+impl Default for cgroup_namespace {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct ns_common {
+    pub ns_type: u32_,
+    pub stashed: *mut dentry,
+    pub ops: *const proc_ns_operations,
+    pub inum: ffi::c_uint,
+    pub __ns_ref: refcount_t,
+    pub __bindgen_anon_1: ns_common__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union ns_common__bindgen_ty_1 {
+    pub __bindgen_anon_1: ns_common__bindgen_ty_1__bindgen_ty_1,
+    pub ns_rcu: callback_head,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ns_common__bindgen_ty_1__bindgen_ty_1 {
+    pub ns_id: u64_,
+    pub ns_tree_node: rb_node,
+    pub ns_list_node: list_head,
+}
+impl Default for ns_common__bindgen_ty_1__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for ns_common__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for ns_common {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct nsproxy {
+    pub count: refcount_t,
+    pub uts_ns: *mut uts_namespace,
+    pub ipc_ns: *mut ipc_namespace,
+    pub mnt_ns: *mut mnt_namespace,
+    pub pid_ns_for_children: *mut pid_namespace,
+    pub net_ns: *mut net,
+    pub time_ns: *mut time_namespace,
+    pub time_ns_for_children: *mut time_namespace,
+    pub cgroup_ns: *mut cgroup_namespace,
+}
+impl Default for nsproxy {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct uid_gid_extent {
+    pub first: u32_,
+    pub lower_first: u32_,
+    pub count: u32_,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct uid_gid_map {
+    pub __bindgen_anon_1: uid_gid_map__bindgen_ty_1,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union uid_gid_map__bindgen_ty_1 {
+    pub __bindgen_anon_1: uid_gid_map__bindgen_ty_1__bindgen_ty_1,
+    pub __bindgen_anon_2: uid_gid_map__bindgen_ty_1__bindgen_ty_2,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct uid_gid_map__bindgen_ty_1__bindgen_ty_1 {
+    pub extent: [uid_gid_extent; 5usize],
+    pub nr_extents: u32_,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct uid_gid_map__bindgen_ty_1__bindgen_ty_2 {
+    pub forward: *mut uid_gid_extent,
+    pub reverse: *mut uid_gid_extent,
+}
+impl Default for uid_gid_map__bindgen_ty_1__bindgen_ty_2 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for uid_gid_map__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for uid_gid_map {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct binfmt_misc {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct ucounts {
+    pub node: hlist_nulls_node,
+    pub ns: *mut user_namespace,
+    pub uid: kuid_t,
+    pub rcu: callback_head,
+    pub count: rcuref_t,
+    pub ucount: [atomic_long_t; 10usize],
+    pub rlimit: [atomic_long_t; 4usize],
+}
+impl Default for ucounts {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct u64_stats_sync {}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct cgroup_bpf {}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct psi_group {}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct cgroup_taskset {
+    _unused: [u8; 0],
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct cgroup_file {
+    pub kn: *mut kernfs_node,
+    pub notified_at: ffi::c_ulong,
+    pub notify_timer: timer_list,
+}
+impl Default for cgroup_file {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct cgroup_subsys_state {
+    pub cgroup: *mut cgroup,
+    pub ss: *mut cgroup_subsys,
+    pub refcnt: percpu_ref,
+    pub rstat_cpu: *mut css_rstat_cpu,
+    pub sibling: list_head,
+    pub children: list_head,
+    pub id: ffi::c_int,
+    pub flags: ffi::c_uint,
+    pub serial_nr: u64_,
+    pub online_cnt: atomic_t,
+    pub destroy_work: work_struct,
+    pub destroy_rwork: rcu_work,
+    pub parent: *mut cgroup_subsys_state,
+    pub nr_descendants: ffi::c_int,
+    pub rstat_flush_next: *mut cgroup_subsys_state,
+}
+impl Default for cgroup_subsys_state {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct css_set {
+    pub subsys: [*mut cgroup_subsys_state; 14usize],
+    pub refcount: refcount_t,
+    pub dom_cset: *mut css_set,
+    pub dfl_cgrp: *mut cgroup,
+    pub nr_tasks: ffi::c_int,
+    pub tasks: list_head,
+    pub mg_tasks: list_head,
+    pub dying_tasks: list_head,
+    pub task_iters: list_head,
+    pub e_cset_node: [list_head; 14usize],
+    pub threaded_csets: list_head,
+    pub threaded_csets_node: list_head,
+    pub hlist: hlist_node,
+    pub cgrp_links: list_head,
+    pub mg_src_preload_node: list_head,
+    pub mg_dst_preload_node: list_head,
+    pub mg_node: list_head,
+    pub mg_src_cgrp: *mut cgroup,
+    pub mg_dst_cgrp: *mut cgroup,
+    pub mg_dst_cset: *mut css_set,
+    pub dead: bool_,
+    pub callback_head: callback_head,
+}
+impl Default for css_set {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct cgroup_base_stat {
+    pub cputime: task_cputime,
+    pub ntime: u64_,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct css_rstat_cpu {
+    pub updated_children: *mut cgroup_subsys_state,
+    pub updated_next: *mut cgroup_subsys_state,
+    pub lnode: llist_node,
+    pub owner: *mut cgroup_subsys_state,
+}
+impl Default for css_rstat_cpu {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct cgroup_rstat_base_cpu {
+    pub bsync: u64_stats_sync,
+    pub bstat: cgroup_base_stat,
+    pub last_bstat: cgroup_base_stat,
+    pub subtree_bstat: cgroup_base_stat,
+    pub last_subtree_bstat: cgroup_base_stat,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct cgroup_freezer_state {
+    pub freeze: bool_,
+    pub e_freeze: bool_,
+    pub nr_frozen_descendants: ffi::c_int,
+    pub nr_frozen_tasks: ffi::c_int,
+    pub freeze_seq: seqcount_spinlock_t,
+    pub freeze_start_nsec: u64_,
+    pub frozen_nsec: u64_,
+}
+#[repr(C)]
+#[repr(align(64))]
+pub struct cgroup {
+    pub self_: cgroup_subsys_state,
+    pub flags: ffi::c_ulong,
+    pub level: ffi::c_int,
+    pub max_depth: ffi::c_int,
+    pub nr_descendants: ffi::c_int,
+    pub nr_dying_descendants: ffi::c_int,
+    pub max_descendants: ffi::c_int,
+    pub nr_populated_csets: ffi::c_int,
+    pub nr_populated_domain_children: ffi::c_int,
+    pub nr_populated_threaded_children: ffi::c_int,
+    pub nr_threaded_children: ffi::c_int,
+    pub kill_seq: ffi::c_uint,
+    pub kn: *mut kernfs_node,
+    pub procs_file: cgroup_file,
+    pub events_file: cgroup_file,
+    pub psi_files: __IncompleteArrayField<cgroup_file>,
+    pub subtree_control: u16_,
+    pub subtree_ss_mask: u16_,
+    pub old_subtree_control: u16_,
+    pub old_subtree_ss_mask: u16_,
+    pub subsys: [*mut cgroup_subsys_state; 14usize],
+    pub nr_dying_subsys: [ffi::c_int; 14usize],
+    pub root: *mut cgroup_root,
+    pub cset_links: list_head,
+    pub e_csets: [list_head; 14usize],
+    pub dom_cgrp: *mut cgroup,
+    pub old_dom_cgrp: *mut cgroup,
+    pub rstat_base_cpu: *mut cgroup_rstat_base_cpu,
+    pub __bindgen_padding_0: u64,
+    pub _pad_: cacheline_padding,
+    pub last_bstat: cgroup_base_stat,
+    pub bstat: cgroup_base_stat,
+    pub prev_cputime: prev_cputime,
+    pub pidlists: list_head,
+    pub pidlist_mutex: mutex,
+    pub offline_waitq: wait_queue_head_t,
+    pub release_agent_work: work_struct,
+    pub psi: *mut psi_group,
+    pub bpf: cgroup_bpf,
+    pub freezer: cgroup_freezer_state,
+    pub ancestors: __IncompleteArrayField<*mut cgroup>,
+}
+impl Default for cgroup {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[repr(align(64))]
+pub struct cgroup_root {
+    pub kf_root: *mut kernfs_root,
+    pub subsys_mask: ffi::c_uint,
+    pub hierarchy_id: ffi::c_int,
+    pub root_list: list_head,
+    pub rcu: callback_head,
+    pub __bindgen_padding_0: [u64; 2usize],
+    pub cgrp: cgroup,
+    pub cgrp_ancestor_storage: *mut cgroup,
+    pub nr_cgrps: atomic_t,
+    pub flags: ffi::c_uint,
+    pub release_agent_path: [ffi::c_char; 4096usize],
+    pub name: [ffi::c_char; 64usize],
+}
+impl Default for cgroup_root {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct cftype {
+    pub name: [ffi::c_char; 64usize],
+    pub private: ffi::c_ulong,
+    pub max_write_len: usize,
+    pub flags: ffi::c_uint,
+    pub file_offset: ffi::c_uint,
+    pub ss: *mut cgroup_subsys,
+    pub node: list_head,
+    pub kf_ops: *mut kernfs_ops,
+    pub open: ::core::option::Option<unsafe extern "C" fn(of: *mut kernfs_open_file) -> ffi::c_int>,
+    pub release: ::core::option::Option<unsafe extern "C" fn(of: *mut kernfs_open_file)>,
+    pub read_u64: ::core::option::Option<
+        unsafe extern "C" fn(css: *mut cgroup_subsys_state, cft: *mut cftype) -> u64_,
+    >,
+    pub read_s64: ::core::option::Option<
+        unsafe extern "C" fn(css: *mut cgroup_subsys_state, cft: *mut cftype) -> s64,
+    >,
+    pub seq_show: ::core::option::Option<
+        unsafe extern "C" fn(sf: *mut seq_file, v: *mut ffi::c_void) -> ffi::c_int,
+    >,
+    pub seq_start: ::core::option::Option<
+        unsafe extern "C" fn(sf: *mut seq_file, ppos: *mut loff_t) -> *mut ffi::c_void,
+    >,
+    pub seq_next: ::core::option::Option<
+        unsafe extern "C" fn(
+            sf: *mut seq_file,
+            v: *mut ffi::c_void,
+            ppos: *mut loff_t,
+        ) -> *mut ffi::c_void,
+    >,
+    pub seq_stop:
+        ::core::option::Option<unsafe extern "C" fn(sf: *mut seq_file, v: *mut ffi::c_void)>,
+    pub write_u64: ::core::option::Option<
+        unsafe extern "C" fn(
+            css: *mut cgroup_subsys_state,
+            cft: *mut cftype,
+            val: u64_,
+        ) -> ffi::c_int,
+    >,
+    pub write_s64: ::core::option::Option<
+        unsafe extern "C" fn(
+            css: *mut cgroup_subsys_state,
+            cft: *mut cftype,
+            val: s64,
+        ) -> ffi::c_int,
+    >,
+    pub write: ::core::option::Option<
+        unsafe extern "C" fn(
+            of: *mut kernfs_open_file,
+            buf: *mut ffi::c_char,
+            nbytes: usize,
+            off: loff_t,
+        ) -> isize,
+    >,
+    pub poll: ::core::option::Option<
+        unsafe extern "C" fn(of: *mut kernfs_open_file, pt: *mut poll_table_struct) -> __poll_t,
+    >,
+    pub lockdep_key: lock_class_key,
+}
+impl Default for cftype {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct cgroup_subsys {
+    pub css_alloc: ::core::option::Option<
+        unsafe extern "C" fn(parent_css: *mut cgroup_subsys_state) -> *mut cgroup_subsys_state,
+    >,
+    pub css_online:
+        ::core::option::Option<unsafe extern "C" fn(css: *mut cgroup_subsys_state) -> ffi::c_int>,
+    pub css_offline: ::core::option::Option<unsafe extern "C" fn(css: *mut cgroup_subsys_state)>,
+    pub css_released: ::core::option::Option<unsafe extern "C" fn(css: *mut cgroup_subsys_state)>,
+    pub css_free: ::core::option::Option<unsafe extern "C" fn(css: *mut cgroup_subsys_state)>,
+    pub css_reset: ::core::option::Option<unsafe extern "C" fn(css: *mut cgroup_subsys_state)>,
+    pub css_killed: ::core::option::Option<unsafe extern "C" fn(css: *mut cgroup_subsys_state)>,
+    pub css_rstat_flush: ::core::option::Option<
+        unsafe extern "C" fn(css: *mut cgroup_subsys_state, cpu: ffi::c_int),
+    >,
+    pub css_extra_stat_show: ::core::option::Option<
+        unsafe extern "C" fn(seq: *mut seq_file, css: *mut cgroup_subsys_state) -> ffi::c_int,
+    >,
+    pub css_local_stat_show: ::core::option::Option<
+        unsafe extern "C" fn(seq: *mut seq_file, css: *mut cgroup_subsys_state) -> ffi::c_int,
+    >,
+    pub can_attach:
+        ::core::option::Option<unsafe extern "C" fn(tset: *mut cgroup_taskset) -> ffi::c_int>,
+    pub cancel_attach: ::core::option::Option<unsafe extern "C" fn(tset: *mut cgroup_taskset)>,
+    pub attach: ::core::option::Option<unsafe extern "C" fn(tset: *mut cgroup_taskset)>,
+    pub can_fork: ::core::option::Option<
+        unsafe extern "C" fn(task: *mut task_struct, cset: *mut css_set) -> ffi::c_int,
+    >,
+    pub cancel_fork:
+        ::core::option::Option<unsafe extern "C" fn(task: *mut task_struct, cset: *mut css_set)>,
+    pub fork: ::core::option::Option<unsafe extern "C" fn(task: *mut task_struct)>,
+    pub exit: ::core::option::Option<unsafe extern "C" fn(task: *mut task_struct)>,
+    pub release: ::core::option::Option<unsafe extern "C" fn(task: *mut task_struct)>,
+    pub bind: ::core::option::Option<unsafe extern "C" fn(root_css: *mut cgroup_subsys_state)>,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub id: ffi::c_int,
+    pub name: *const ffi::c_char,
+    pub legacy_name: *const ffi::c_char,
+    pub root: *mut cgroup_root,
+    pub css_idr: idr,
+    pub cfts: list_head,
+    pub dfl_cftypes: *mut cftype,
+    pub legacy_cftypes: *mut cftype,
+    pub depends_on: ffi::c_uint,
+    pub rstat_ss_lock: spinlock_t,
+    pub lhead: *mut llist_head,
+}
+impl Default for cgroup_subsys {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl cgroup_subsys {
+    #[inline]
+    pub fn early_init(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_early_init(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn early_init_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_early_init_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn implicit_on_dfl(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_implicit_on_dfl(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn implicit_on_dfl_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_implicit_on_dfl_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn threaded(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(2usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_threaded(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn threaded_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                2usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_threaded_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                2usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        early_init: bool_,
+        implicit_on_dfl: bool_,
+        threaded: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let early_init: u8 = unsafe { ::core::mem::transmute(early_init) };
+            early_init as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let implicit_on_dfl: u8 = unsafe { ::core::mem::transmute(implicit_on_dfl) };
+            implicit_on_dfl as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let threaded: u8 = unsafe { ::core::mem::transmute(threaded) };
+            threaded as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct fprop_local_percpu {
+    pub events: percpu_counter,
+    pub period: ffi::c_uint,
+    pub lock: raw_spinlock_t,
+}
+impl Default for fprop_local_percpu {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const wb_reason_WB_REASON_BACKGROUND: wb_reason = 0;
+pub const wb_reason_WB_REASON_VMSCAN: wb_reason = 1;
+pub const wb_reason_WB_REASON_SYNC: wb_reason = 2;
+pub const wb_reason_WB_REASON_PERIODIC: wb_reason = 3;
+pub const wb_reason_WB_REASON_LAPTOP_TIMER: wb_reason = 4;
+pub const wb_reason_WB_REASON_FS_FREE_SPACE: wb_reason = 5;
+pub const wb_reason_WB_REASON_FORKER_THREAD: wb_reason = 6;
+pub const wb_reason_WB_REASON_FOREIGN_FLUSH: wb_reason = 7;
+pub const wb_reason_WB_REASON_MAX: wb_reason = 8;
+pub type wb_reason = ffi::c_uint;
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct bdi_writeback {
+    pub bdi: *mut backing_dev_info,
+    pub state: ffi::c_ulong,
+    pub last_old_flush: ffi::c_ulong,
+    pub b_dirty: list_head,
+    pub b_io: list_head,
+    pub b_more_io: list_head,
+    pub b_dirty_time: list_head,
+    pub list_lock: spinlock_t,
+    pub writeback_inodes: atomic_t,
+    pub stat: [percpu_counter; 4usize],
+    pub bw_time_stamp: ffi::c_ulong,
+    pub dirtied_stamp: ffi::c_ulong,
+    pub written_stamp: ffi::c_ulong,
+    pub write_bandwidth: ffi::c_ulong,
+    pub avg_write_bandwidth: ffi::c_ulong,
+    pub dirty_ratelimit: ffi::c_ulong,
+    pub balanced_dirty_ratelimit: ffi::c_ulong,
+    pub completions: fprop_local_percpu,
+    pub dirty_exceeded: ffi::c_int,
+    pub start_all_reason: wb_reason,
+    pub work_lock: spinlock_t,
+    pub work_list: list_head,
+    pub dwork: delayed_work,
+    pub bw_dwork: delayed_work,
+    pub bdi_node: list_head,
+}
+impl Default for bdi_writeback {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct backing_dev_info {
+    pub id: u64_,
+    pub rb_node: rb_node,
+    pub bdi_list: list_head,
+    pub ra_pages: ffi::c_ulong,
+    pub io_pages: ffi::c_ulong,
+    pub refcnt: kref,
+    pub capabilities: ffi::c_uint,
+    pub min_ratio: ffi::c_uint,
+    pub max_ratio: ffi::c_uint,
+    pub max_prop_frac: ffi::c_uint,
+    pub tot_write_bandwidth: atomic_long_t,
+    pub last_bdp_sleep: ffi::c_ulong,
+    pub wb: bdi_writeback,
+    pub wb_list: list_head,
+    pub wb_waitq: wait_queue_head_t,
+    pub dev: *mut device,
+    pub dev_name: [ffi::c_char; 64usize],
+    pub owner: *mut device,
+    pub laptop_mode_wb_timer: timer_list,
+    pub debug_dir: *mut dentry,
+}
+impl Default for backing_dev_info {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct bio_vec {
+    pub bv_page: *mut page,
+    pub bv_len: ffi::c_uint,
+    pub bv_offset: ffi::c_uint,
+}
+impl Default for bio_vec {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct block_device {
+    pub bd_start_sect: sector_t,
+    pub bd_nr_sectors: sector_t,
+    pub bd_disk: *mut gendisk,
+    pub bd_queue: *mut request_queue,
+    pub bd_stats: *mut disk_stats,
+    pub bd_stamp: ffi::c_ulong,
+    pub __bd_flags: atomic_t,
+    pub bd_dev: dev_t,
+    pub bd_mapping: *mut address_space,
+    pub bd_openers: atomic_t,
+    pub bd_size_lock: spinlock_t,
+    pub bd_claiming: *mut ffi::c_void,
+    pub bd_holder: *mut ffi::c_void,
+    pub bd_holder_ops: *mut blk_holder_ops,
+    pub bd_holder_lock: mutex,
+    pub bd_holders: ffi::c_int,
+    pub bd_holder_dir: *mut kobject,
+    pub bd_fsfreeze_count: atomic_t,
+    pub bd_fsfreeze_mutex: mutex,
+    pub bd_meta_info: *mut partition_meta_info,
+    pub bd_writers: ffi::c_int,
+    pub bd_security: *mut ffi::c_void,
+    pub bd_device: device,
+}
+impl Default for block_device {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct folio_batch {
+    pub nr: ffi::c_uchar,
+    pub i: ffi::c_uchar,
+    pub percpu_pvec_drained: bool_,
+    pub folios: [*mut folio; 31usize],
+}
+impl Default for folio_batch {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+unsafe extern "C" {
+    pub fn folio_batch_remove_exceptionals(fbatch: *mut folio_batch);
+}
+pub const writeback_sync_modes_WB_SYNC_NONE: writeback_sync_modes = 0;
+pub const writeback_sync_modes_WB_SYNC_ALL: writeback_sync_modes = 1;
+pub type writeback_sync_modes = ffi::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct writeback_control {
+    pub nr_to_write: ffi::c_long,
+    pub pages_skipped: ffi::c_long,
+    pub range_start: loff_t,
+    pub range_end: loff_t,
+    pub sync_mode: writeback_sync_modes,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub fbatch: folio_batch,
+    pub index: ffi::c_ulong,
+    pub saved_err: ffi::c_int,
+}
+impl Default for writeback_control {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl writeback_control {
+    #[inline]
+    pub fn for_kupdate(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_for_kupdate(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn for_kupdate_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_for_kupdate_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn for_background(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_for_background(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn for_background_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                1usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_for_background_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                1usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn tagged_writepages(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(2usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_tagged_writepages(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn tagged_writepages_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                2usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_tagged_writepages_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                2usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn range_cyclic(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(3usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_range_cyclic(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn range_cyclic_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                3usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_range_cyclic_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                3usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn for_sync(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(4usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_for_sync(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn for_sync_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                4usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_for_sync_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                4usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn unpinned_netfs_wb(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(5usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_unpinned_netfs_wb(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(5usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn unpinned_netfs_wb_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                5usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_unpinned_netfs_wb_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                5usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn no_cgroup_owner(&self) -> ffi::c_uint {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(6usize, 1u8) as u32) }
+    }
+    #[inline]
+    pub fn set_no_cgroup_owner(&mut self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(6usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn no_cgroup_owner_raw(this: *const Self) -> ffi::c_uint {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                6usize,
+                1u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_no_cgroup_owner_raw(this: *mut Self, val: ffi::c_uint) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                6usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        for_kupdate: ffi::c_uint,
+        for_background: ffi::c_uint,
+        tagged_writepages: ffi::c_uint,
+        range_cyclic: ffi::c_uint,
+        for_sync: ffi::c_uint,
+        unpinned_netfs_wb: ffi::c_uint,
+        no_cgroup_owner: ffi::c_uint,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let for_kupdate: u32 = unsafe { ::core::mem::transmute(for_kupdate) };
+            for_kupdate as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let for_background: u32 = unsafe { ::core::mem::transmute(for_background) };
+            for_background as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let tagged_writepages: u32 = unsafe { ::core::mem::transmute(tagged_writepages) };
+            tagged_writepages as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let range_cyclic: u32 = unsafe { ::core::mem::transmute(range_cyclic) };
+            range_cyclic as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let for_sync: u32 = unsafe { ::core::mem::transmute(for_sync) };
+            for_sync as u64
+        });
+        __bindgen_bitfield_unit.set(5usize, 1u8, {
+            let unpinned_netfs_wb: u32 = unsafe { ::core::mem::transmute(unpinned_netfs_wb) };
+            unpinned_netfs_wb as u64
+        });
+        __bindgen_bitfield_unit.set(6usize, 1u8, {
+            let no_cgroup_owner: u32 = unsafe { ::core::mem::transmute(no_cgroup_owner) };
+            no_cgroup_owner as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+unsafe extern "C" {
+    pub fn folio_redirty_for_writepage(arg1: *mut writeback_control, arg2: *mut folio) -> bool_;
+}
+unsafe extern "C" {
+    pub fn security_task_to_inode(p: *mut task_struct, inode: *mut inode);
+}
+pub const fs_context_purpose_FS_CONTEXT_FOR_MOUNT: fs_context_purpose = 0;
+pub const fs_context_purpose_FS_CONTEXT_FOR_SUBMOUNT: fs_context_purpose = 1;
+pub const fs_context_purpose_FS_CONTEXT_FOR_RECONFIGURE: fs_context_purpose = 2;
+pub type fs_context_purpose = ffi::c_uint;
+pub const fs_context_phase_FS_CONTEXT_CREATE_PARAMS: fs_context_phase = 0;
+pub const fs_context_phase_FS_CONTEXT_CREATING: fs_context_phase = 1;
+pub const fs_context_phase_FS_CONTEXT_AWAITING_MOUNT: fs_context_phase = 2;
+pub const fs_context_phase_FS_CONTEXT_AWAITING_RECONF: fs_context_phase = 3;
+pub const fs_context_phase_FS_CONTEXT_RECONF_PARAMS: fs_context_phase = 4;
+pub const fs_context_phase_FS_CONTEXT_RECONFIGURING: fs_context_phase = 5;
+pub const fs_context_phase_FS_CONTEXT_FAILED: fs_context_phase = 6;
+pub type fs_context_phase = ffi::c_uint;
+pub const fs_value_type_fs_value_is_undefined: fs_value_type = 0;
+pub const fs_value_type_fs_value_is_flag: fs_value_type = 1;
+pub const fs_value_type_fs_value_is_string: fs_value_type = 2;
+pub const fs_value_type_fs_value_is_blob: fs_value_type = 3;
+pub const fs_value_type_fs_value_is_filename: fs_value_type = 4;
+pub const fs_value_type_fs_value_is_file: fs_value_type = 5;
+pub type fs_value_type = i32;
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct fs_parameter {
+    pub key: *const ffi::c_char,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize]>,
+    pub __bindgen_anon_1: fs_parameter__bindgen_ty_1,
+    pub size: usize,
+    pub dirfd: ffi::c_int,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union fs_parameter__bindgen_ty_1 {
+    pub string: *mut ffi::c_char,
+    pub blob: *mut ffi::c_void,
+    pub name: *mut filename,
+    pub file: *mut file,
+}
+impl Default for fs_parameter__bindgen_ty_1 {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl Default for fs_parameter {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl fs_parameter {
+    #[inline]
+    pub fn type_(&self) -> fs_value_type {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_type(&mut self, val: fs_value_type) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn type__raw(this: *const Self) -> fs_value_type {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 1usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                8u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_type_raw(this: *mut Self, val: fs_value_type) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 1usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                8u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(type_: fs_value_type) -> __BindgenBitfieldUnit<[u8; 1usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 8u8, {
+            let type_: u32 = unsafe { ::core::mem::transmute(type_) };
+            type_ as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct p_log {
+    pub prefix: *const ffi::c_char,
+    pub log: *mut fc_log,
+}
+impl Default for p_log {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct fs_context {
+    pub ops: *const fs_context_operations,
+    pub uapi_mutex: mutex,
+    pub fs_type: *mut file_system_type,
+    pub fs_private: *mut ffi::c_void,
+    pub sget_key: *mut ffi::c_void,
+    pub root: *mut dentry,
+    pub user_ns: *mut user_namespace,
+    pub net_ns: *mut net,
+    pub cred: *const cred,
+    pub log: p_log,
+    pub source: *const ffi::c_char,
+    pub security: *mut ffi::c_void,
+    pub s_fs_info: *mut ffi::c_void,
+    pub sb_flags: ffi::c_uint,
+    pub sb_flags_mask: ffi::c_uint,
+    pub s_iflags: ffi::c_uint,
+    pub _bitfield_align_1: [u8; 0],
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 3usize]>,
+    pub __bindgen_padding_0: u8,
+}
+impl Default for fs_context {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+impl fs_context {
+    #[inline]
+    pub fn purpose(&self) -> fs_context_purpose {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(0usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_purpose(&mut self, val: fs_context_purpose) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(0usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn purpose_raw(this: *const Self) -> fs_context_purpose {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 3usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                0usize,
+                8u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_purpose_raw(this: *mut Self, val: fs_context_purpose) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 3usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                0usize,
+                8u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn phase(&self) -> fs_context_phase {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(8usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_phase(&mut self, val: fs_context_phase) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            self._bitfield_1.set(8usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn phase_raw(this: *const Self) -> fs_context_phase {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 3usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                8usize,
+                8u8,
+            ) as u32)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_phase_raw(this: *mut Self, val: fs_context_phase) {
+        unsafe {
+            let val: u32 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 3usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                8usize,
+                8u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn need_free(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(16usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_need_free(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(16usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn need_free_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 3usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                16usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_need_free_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 3usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                16usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn global(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(17usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_global(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(17usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn global_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 3usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                17usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_global_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 3usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                17usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn oldapi(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(18usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_oldapi(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(18usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn oldapi_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 3usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                18usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_oldapi_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 3usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                18usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn exclusive(&self) -> bool_ {
+        unsafe { ::core::mem::transmute(self._bitfield_1.get(19usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_exclusive(&mut self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            self._bitfield_1.set(19usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub unsafe fn exclusive_raw(this: *const Self) -> bool_ {
+        unsafe {
+            ::core::mem::transmute(<__BindgenBitfieldUnit<[u8; 3usize]>>::raw_get(
+                ::core::ptr::addr_of!((*this)._bitfield_1),
+                19usize,
+                1u8,
+            ) as u8)
+        }
+    }
+    #[inline]
+    pub unsafe fn set_exclusive_raw(this: *mut Self, val: bool_) {
+        unsafe {
+            let val: u8 = ::core::mem::transmute(val);
+            <__BindgenBitfieldUnit<[u8; 3usize]>>::raw_set(
+                ::core::ptr::addr_of_mut!((*this)._bitfield_1),
+                19usize,
+                1u8,
+                val as u64,
+            )
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        purpose: fs_context_purpose,
+        phase: fs_context_phase,
+        need_free: bool_,
+        global: bool_,
+        oldapi: bool_,
+        exclusive: bool_,
+    ) -> __BindgenBitfieldUnit<[u8; 3usize]> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 3usize]> = Default::default();
+        __bindgen_bitfield_unit.set(0usize, 8u8, {
+            let purpose: u32 = unsafe { ::core::mem::transmute(purpose) };
+            purpose as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 8u8, {
+            let phase: u32 = unsafe { ::core::mem::transmute(phase) };
+            phase as u64
+        });
+        __bindgen_bitfield_unit.set(16usize, 1u8, {
+            let need_free: u8 = unsafe { ::core::mem::transmute(need_free) };
+            need_free as u64
+        });
+        __bindgen_bitfield_unit.set(17usize, 1u8, {
+            let global: u8 = unsafe { ::core::mem::transmute(global) };
+            global as u64
+        });
+        __bindgen_bitfield_unit.set(18usize, 1u8, {
+            let oldapi: u8 = unsafe { ::core::mem::transmute(oldapi) };
+            oldapi as u64
+        });
+        __bindgen_bitfield_unit.set(19usize, 1u8, {
+            let exclusive: u8 = unsafe { ::core::mem::transmute(exclusive) };
+            exclusive as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct fs_context_operations {
+    pub free: ::core::option::Option<unsafe extern "C" fn(fc: *mut fs_context)>,
+    pub dup: ::core::option::Option<
+        unsafe extern "C" fn(fc: *mut fs_context, src_fc: *mut fs_context) -> ffi::c_int,
+    >,
+    pub parse_param: ::core::option::Option<
+        unsafe extern "C" fn(fc: *mut fs_context, param: *mut fs_parameter) -> ffi::c_int,
+    >,
+    pub parse_monolithic: ::core::option::Option<
+        unsafe extern "C" fn(fc: *mut fs_context, data: *mut ffi::c_void) -> ffi::c_int,
+    >,
+    pub get_tree: ::core::option::Option<unsafe extern "C" fn(fc: *mut fs_context) -> ffi::c_int>,
+    pub reconfigure:
+        ::core::option::Option<unsafe extern "C" fn(fc: *mut fs_context) -> ffi::c_int>,
+}
+unsafe extern "C" {
+    pub fn fs_context_for_mount(
+        fs_type: *mut file_system_type,
+        sb_flags: ffi::c_uint,
+    ) -> *mut fs_context;
+}
+unsafe extern "C" {
+    pub fn fs_context_for_reconfigure(
+        dentry: *mut dentry,
+        sb_flags: ffi::c_uint,
+        sb_flags_mask: ffi::c_uint,
+    ) -> *mut fs_context;
+}
+unsafe extern "C" {
+    pub fn fs_context_for_submount(
+        fs_type: *mut file_system_type,
+        reference: *mut dentry,
+    ) -> *mut fs_context;
+}
+unsafe extern "C" {
+    pub fn generic_parse_monolithic(fc: *mut fs_context, data: *mut ffi::c_void) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn get_tree_nodev(
+        fc: *mut fs_context,
+        fill_super: ::core::option::Option<
+            unsafe extern "C" fn(sb: *mut super_block, fc: *mut fs_context) -> ffi::c_int,
+        >,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn get_tree_single(
+        fc: *mut fs_context,
+        fill_super: ::core::option::Option<
+            unsafe extern "C" fn(sb: *mut super_block, fc: *mut fs_context) -> ffi::c_int,
+        >,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn get_tree_keyed(
+        fc: *mut fs_context,
+        fill_super: ::core::option::Option<
+            unsafe extern "C" fn(sb: *mut super_block, fc: *mut fs_context) -> ffi::c_int,
+        >,
+        key: *mut ffi::c_void,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn get_tree_bdev_flags(
+        fc: *mut fs_context,
+        fill_super: ::core::option::Option<
+            unsafe extern "C" fn(sb: *mut super_block, fc: *mut fs_context) -> ffi::c_int,
+        >,
+        flags: ffi::c_uint,
+    ) -> ffi::c_int;
+}
+unsafe extern "C" {
+    pub fn get_tree_bdev(
+        fc: *mut fs_context,
+        fill_super: ::core::option::Option<
+            unsafe extern "C" fn(sb: *mut super_block, fc: *mut fs_context) -> ffi::c_int,
+        >,
+    ) -> ffi::c_int;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct fc_log {
+    pub usage: refcount_t,
+    pub head: u8_,
+    pub tail: u8_,
+    pub need_free: u8_,
+    pub owner: *mut module,
+    pub buffer: [*mut ffi::c_char; 8usize],
+}
+impl Default for fc_log {
+    fn default() -> Self {
+        let mut s = ::core::mem::MaybeUninit::<Self>::uninit();
+        unsafe {
+            ::core::ptr::write_bytes(s.as_mut_ptr(), 0, 1);
+            s.assume_init()
+        }
+    }
+}
+pub const BINDINGS_SLAB_RECLAIM_ACCOUNT: slab_flags_t = 16384;
+pub const BINDINGS_SLAB_ACCOUNT: slab_flags_t = 0;
+pub const BINDINGS_MAX_LFS_FILESIZE: loff_t = 9223372036854775807;
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct kernel_symbol {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct module_sect_attrs {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct module_notes_attrs {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct trace_event_call {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct trace_eval_map {
+    pub _address: u8,
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
@@ -7557,11 +13816,6 @@ pub struct rt_mutex_waiter {
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct compat_robust_list_head {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Default, Copy, Clone)]
 pub struct gendisk {
     pub _address: u8,
 }
@@ -7572,22 +13826,7 @@ pub struct ldt_struct {
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct vdso_image {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Default, Copy, Clone)]
 pub struct page_pool {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Default, Copy, Clone)]
-pub struct vm_operations_struct {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Default, Copy, Clone)]
-pub struct anon_vma {
     pub _address: u8,
 }
 #[repr(C)]
@@ -7612,12 +13851,12 @@ pub struct tty_struct {
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct taskstats {
+pub struct tty_audit_buf {
     pub _address: u8,
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct tty_audit_buf {
+pub struct request_queue {
     pub _address: u8,
 }
 #[repr(C)]
@@ -7642,11 +13881,56 @@ pub struct xattr_handler {
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct block_device {
+pub struct mtd_info {
     pub _address: u8,
 }
 #[repr(C)]
 #[derive(Debug, Default, Copy, Clone)]
-pub struct mtd_info {
+pub struct kernfs_root {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct module_param_attrs {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct dev_pm_qos {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct of_device_id {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct acpi_device_id {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct bus_dma_region {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct io_tlb_mem {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct disk_stats {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct blk_holder_ops {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Default, Copy, Clone)]
+pub struct partition_meta_info {
     pub _address: u8,
 }

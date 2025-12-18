@@ -1,0 +1,8 @@
+# SPDX-License-Identifier: GPL-2.0
+
+# Tell KBuild to build a module from pre-built object files
+obj-m := rinux_rofs.o
+
+# Use pre-built object files (compiled by cargo in Makefile)
+# Object files are in the MO (module output) directory
+rinux_rofs-objs := rinux_rofs_main.o rinux_fs.o rinux_kernel.o rinux_bindings.o rinux_helper.o helpers.o

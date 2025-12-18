@@ -27,6 +27,7 @@ add_custom_target(clean_all)
 add_custom_target(fmt_all)
 add_subdirectory(external/kmods)
 add_subdirectory(samples/einux-kmod)
+add_subdirectory(samples/rinux-rofs)
 
 # copy stuff in image
 # mount

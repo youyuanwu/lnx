@@ -4,9 +4,12 @@
 //!
 //! C headers: [`include/linux/fs.h`](../../include/linux/fs.h)
 
-use crate::error::{code::*, Result};
-use crate::types::{AlwaysRefCounted, Opaque, ScopeGuard};
-use core::{cmp::min, ptr};
+use core::ptr;
+use kernel::error::Result;
+use kernel::prelude::*;
+use kernel::types::{AlwaysRefCounted, Opaque};
+
+use crate::ffi as bindings;
 
 /// Wraps the kernel's `struct folio`.
 ///
@@ -21,7 +24,7 @@ pub struct Folio(Opaque<bindings::folio>);
 unsafe impl AlwaysRefCounted for Folio {
     fn inc_ref(&self) {
         // SAFETY: The existence of a shared reference means that the refcount is nonzero.
-        unsafe { bindings::folio_get(self.0.get()) };
+        unsafe { bindings::folio_get(self.0.get() as *mut core::ffi::c_void) };
     }
 
     unsafe fn dec_ref(obj: ptr::NonNull<Self>) {
@@ -34,19 +37,19 @@ impl Folio {
     /// Returns the byte position of this folio in its file.
     pub fn pos(&self) -> i64 {
         // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
-        unsafe { bindings::folio_pos(self.0.get()) }
+        unsafe { bindings::folio_pos(self.0.get() as *mut core::ffi::c_void) }
     }
 
     /// Returns the byte size of this folio.
     pub fn size(&self) -> usize {
         // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
-        unsafe { bindings::folio_size(self.0.get()) }
+        unsafe { bindings::folio_size(self.0.get() as *mut core::ffi::c_void) }
     }
 
     /// Flushes the data cache for the pages that make up the folio.
     pub fn flush_dcache(&self) {
         // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
-        unsafe { bindings::flush_dcache_folio(self.0.get()) }
+        unsafe { bindings::flush_dcache_folio(self.0.get() as *mut core::ffi::c_void) }
     }
 }
 
@@ -68,20 +71,21 @@ impl LockedFolio<'_> {
     /// Marks the folio as being up to date.
     pub fn mark_uptodate(&mut self) {
         // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
-        unsafe { bindings::folio_mark_uptodate(self.0 .0.get()) }
+        unsafe { bindings::folio_mark_uptodate(self.0.0.get() as *mut core::ffi::c_void) }
     }
 
-    /// Sets the error flag on the folio.
-    pub fn set_error(&mut self) {
-        // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
-        unsafe { bindings::folio_set_error(self.0 .0.get()) }
-    }
+    // TODO: replace with folio_set_uptodate and folio_clear_uptodate once available in bindings
+    // /// Sets the error flag on the folio.
+    // pub fn set_error(&mut self) {
+    //     // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
+    //     unsafe { bindings::folio_set_error(self.0 .0.get() as *mut core::ffi::c_void) }
+    // }
 
     fn for_each_page(
         &mut self,
         offset: usize,
         len: usize,
-        mut cb: impl FnMut(&mut [u8]) -> Result,
+        mut cb: impl FnMut(&mut [u8]) -> Result<()>,
     ) -> Result {
         let mut remaining = len;
         let mut next_offset = offset;
@@ -93,10 +97,12 @@ impl LockedFolio<'_> {
         }
 
         while remaining > 0 {
-            let page_offset = next_offset & (bindings::PAGE_SIZE - 1);
-            let usable = min(remaining, bindings::PAGE_SIZE - page_offset);
-            let ptr = unsafe { bindings::kmap_local_folio(self.0 .0.get(), next_offset) };
-            let _guard = ScopeGuard::new(|| unsafe { bindings::kunmap_local(ptr) });
+            let page_offset = next_offset & (kernel::page::PAGE_SIZE - 1);
+            let usable = core::cmp::min(remaining, kernel::page::PAGE_SIZE - page_offset);
+            let ptr = unsafe {
+                bindings::kmap_local_folio(self.0.0.get() as *mut core::ffi::c_void, next_offset)
+            };
+            let _guard = kernel::types::ScopeGuard::new(|| unsafe { bindings::kunmap_local(ptr) });
             let s = unsafe { core::slice::from_raw_parts_mut(ptr.cast::<u8>(), usable) };
             cb(s)?;
 
@@ -137,6 +143,7 @@ impl core::ops::Deref for LockedFolio<'_> {
 impl Drop for LockedFolio<'_> {
     fn drop(&mut self) {
         // SAFETY: The folio is valid because the shared reference implies a non-zero refcount.
-        unsafe { bindings::folio_unlock(self.0 .0.get()) }
+
+        unsafe { kernel::bindings::folio_unlock(self.0.0.get() as *mut kernel::bindings::folio) }
     }
 }

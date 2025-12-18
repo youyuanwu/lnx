@@ -1,4 +1,21 @@
 # Install deps
+
+# QUICK Steps
+```sh
+cmake --build build --target build_empty_image
+# manual follow cmake docs for : copy stuff in image
+cmake --build build --target debfs_cp_ko
+./scripts/run_qemu.sh
+# login: root
+
+insmod /lib/modules/6.18.0/rust_out_of_tree.ko 
+lsmod
+rmmod rust_out_of_tree
+
+shutdown now
+```
+
+# MISC
 QEMU KVM
 ```sh
 sudo apt install qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils virt-manager
@@ -33,7 +50,7 @@ sudo cp ../../rust_out_of_tree.ko ./rootfs
 sudo umount ./rootfs
 ```
 
-insmod /lib/modules/6.15.0-rc5-gb4099f6aa966/rust_out_of_tree.ko 
+insmod /lib/modules/6.18.0/rust_out_of_tree.ko 
 lsmod
 rmmod rust_out_of_tree
 

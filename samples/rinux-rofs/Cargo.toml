@@ -1,5 +1,5 @@
 [package]
-name = "rinux-fs"
+name = "rinux-rofs"
 version = "0.1.0"
 edition = "2024"
 
@@ -8,7 +8,4 @@ test = false
 bench = false
 
 [dependencies]
-rinux-helper.workspace = true
-
-[build-dependencies]
-bindgen.workspace = true
+rinux-fs = { workspace = true }

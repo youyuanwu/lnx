@@ -1,2 +1,3 @@
 ls -l /
 ls -l /etc/modules-load.d/
+ls -l /lib/modules
