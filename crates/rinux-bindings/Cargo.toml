@@ -3,7 +3,11 @@ name = "rinux-bindings"
 version = "0.1.0"
 edition = "2021"
 
+
+# it is possible to directly use the lib.rs from linx source
+# but rust analyzer cannot find it. So we symlink generated code to OUT_DIR and use that.
 [lib]
+# path = "../../linux/rust/bindings/lib.rs"
 test = false
 bench = false
 

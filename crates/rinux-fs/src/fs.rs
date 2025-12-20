@@ -15,8 +15,9 @@ pub mod ro {
     use kernel::error::{Error, Result, code::*, from_result, to_result};
     use kernel::prelude::{pin_data, pinned_drop};
     use kernel::types::{ARef, AlwaysRefCounted, ForeignOwnable, Opaque, ScopeGuard};
-    use kernel::{ThisModule, bindings, container_of, str::CStr, try_pin_init};
+    use kernel::{ThisModule, container_of, str::CStr, try_pin_init};
     use pin_init::PinInit;
+    use rinux_bindings as bindings;
 
     /// Type of superblock keying.
     ///

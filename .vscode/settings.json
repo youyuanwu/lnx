@@ -6,4 +6,8 @@
     "Cargo.toml"
   ],
   "rust-analyzer.cfg.setTest": false, // No tests.
+  "rust-analyzer.cargo.extraEnv": {
+    "OBJTREE": "build/linux_bin"
+  },
+  "rust-analyzer.vfs.extraIncludes": ["build/linux_bin/rust/bindings/bindings_generated.rs"]
 }

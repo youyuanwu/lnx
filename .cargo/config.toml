@@ -1,7 +1,6 @@
 [env]
 # Enable unstable features on stable rustc. Same as linux makefile.
 RUSTC_BOOTSTRAP = "1"
-OBJTREE = "build/linux_bin"
 
 [build]
 # Target specification for kernel modules
