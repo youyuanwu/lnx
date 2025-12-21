@@ -57,7 +57,7 @@ jobs:
     - name: Check build artifacts
       run: |
         cargo --version
-        ls -la build/linux_bin/scripts/
+        ls -la linux_bin/scripts/
 
     - name: Run cargo check
       run: cargo check

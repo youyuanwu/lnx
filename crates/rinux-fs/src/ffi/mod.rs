@@ -9,9 +9,9 @@
     clippy::all
 )]
 
-include!("bindings.rs");
+include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 
-pub use rinux_helper::*;
+pub use rinux_helper::fs::*;
 
 pub const SLAB_RECLAIM_ACCOUNT: slab_flags_t = BINDINGS_SLAB_RECLAIM_ACCOUNT;
 pub const SLAB_ACCOUNT: slab_flags_t = BINDINGS_SLAB_ACCOUNT;

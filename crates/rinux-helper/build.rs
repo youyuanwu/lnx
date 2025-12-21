@@ -1,16 +1,16 @@
+// This compiles the c helper functions into a static library for linking.
 fn main() {
     let manifest_dir = std::path::PathBuf::from(std::env::var("CARGO_MANIFEST_DIR").unwrap());
     let root_dir = manifest_dir.parent().unwrap().parent().unwrap();
 
     // Kernel source and build directories
     let linux_src = root_dir.join("linux");
-    let linux_build = root_dir.join("build").join("linux_bin");
+    let linux_build = root_dir.join("linux_bin");
 
     // Include paths for kernel headers
     let inc_dir = linux_src.join("include");
     let inc_generated = linux_build.join("include");
     let inc_arch_src = linux_src.join("arch").join("x86").join("include");
-    let inc_arch = linux_build.join("arch").join("x86").join("include");
     let inc_arch_generated = linux_build
         .join("arch")
         .join("x86")
@@ -35,7 +35,6 @@ fn main() {
         .arg(format!("-I{}", inc_dir.display()))
         .arg(format!("-I{}", inc_generated.display()))
         .arg(format!("-I{}", inc_arch_src.display()))
-        .arg(format!("-I{}", inc_arch.display()))
         .arg(format!("-I{}", inc_arch_generated.display()))
         .arg("-include")
         .arg(&autoconf)

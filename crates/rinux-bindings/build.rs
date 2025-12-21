@@ -2,7 +2,7 @@ fn main() {
     // get manifest dir
     let manifest_dir = std::env::var("CARGO_MANIFEST_DIR").unwrap();
     let out_dir = std::env::var("OUT_DIR").unwrap();
-    let bindings_src_dir = format!("{}/../../build/linux_bin/rust/bindings", manifest_dir);
+    let bindings_src_dir = format!("{}/../../linux_bin/rust/bindings", manifest_dir);
     // create a symlink to bindings_generated.rs file if not exists
     let src = format!("{}/bindings_generated.rs", bindings_src_dir);
     let helper_src = format!("{}/bindings_helpers_generated.rs", bindings_src_dir);

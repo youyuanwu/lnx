@@ -8,7 +8,7 @@ fn overwrite_bindgen() {
 
     // Kernel source and build directories
     let linux_src = root_dir.join("linux");
-    let linux_build = root_dir.join("build").join("linux_bin");
+    let linux_build = root_dir.join("linux_bin");
 
     // Include paths matching kernel build system
     let inc_dir = linux_src.join("include");
@@ -44,7 +44,7 @@ fn overwrite_bindgen() {
     let bindings = bindgen::Builder::default()
         // The input header we would like to generate
         // bindings for.
-        .header(manifest_dir.join("ffi/wrapper.h").to_str().unwrap())
+        .header(manifest_dir.join("include/wrapper.h").to_str().unwrap())
         // Match kernel: --target=$(BINDGEN_TARGET)
         .clang_arg(format!("--target={}", target))
         // Prevent use of system headers
@@ -96,9 +96,8 @@ fn overwrite_bindgen() {
         // Unwrap the Result and panic on failure.
         .expect("Unable to generate bindings");
 
-    // Write bindings to src/bindings directory
-    let out_path = manifest_dir.join("src").join("ffi");
-    std::fs::create_dir_all(&out_path).expect("Failed to create bindings directory");
+    // Write bindings to OUT_DIR directory
+    let out_path = std::path::PathBuf::from(std::env::var("OUT_DIR").unwrap());
     let binding_file = "bindings.rs";
     bindings
         .write_to_file(out_path.join(binding_file))

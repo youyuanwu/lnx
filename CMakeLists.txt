@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.20)
 project(lnx LANGUAGES)
 
 set(KDIR_ROOT ${CMAKE_SOURCE_DIR}/linux)
-set(KBIN_ROOT ${CMAKE_BINARY_DIR}/linux_bin)
+set(KBIN_ROOT ${CMAKE_SOURCE_DIR}/linux_bin)
 
 # Check if SCCACHE_GHA_ENABLED envariable is set
 if(DEFINED ENV{SCCACHE_GHA_ENABLED})
@@ -15,7 +15,9 @@ endif()
 
 
 # Check that the kernel source directory exists
-# Manually create a symlink: ln -s ../linux linux
+# Manually create a symlink: 
+# ln -s ../linux linux
+# ln -s ../linux_bin linux_bin
 # Or manually unlink: 
 # unlink ./linux
 if(NOT EXISTS ${KDIR_ROOT}/Makefile)

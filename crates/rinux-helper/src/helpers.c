@@ -17,6 +17,9 @@
 #include <linux/highmem.h>
 #include <linux/slab.h>
 
+
+// fs related helpers.
+
 void rust_helper_folio_get(struct folio *folio)
 {
 	folio_get(folio);
