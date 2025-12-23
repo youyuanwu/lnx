@@ -9,7 +9,7 @@
 /// Read-only file systems.
 pub mod ro {
     use crate::folio::LockedFolio;
-    use crate::{Either, ffi as bindings2};
+    use crate::{Either, ffi};
     use core::mem::{ManuallyDrop, MaybeUninit, align_of, size_of};
     use core::{marker::PhantomData, marker::PhantomPinned, pin::Pin, ptr};
     use kernel::error::{Error, Result, code::*, from_result, to_result};
@@ -17,7 +17,6 @@ pub mod ro {
     use kernel::types::{ARef, AlwaysRefCounted, ForeignOwnable, Opaque, ScopeGuard};
     use kernel::{ThisModule, container_of, str::CStr, try_pin_init};
     use pin_init::PinInit;
-    use rinux_bindings as bindings;
 
     /// Type of superblock keying.
     ///
@@ -68,35 +67,35 @@ pub mod ro {
     #[derive(Copy, Clone)]
     pub enum DirEntryType {
         /// Unknown type.
-        Unknown = bindings::DT_UNKNOWN,
+        Unknown = ffi::DT_UNKNOWN,
 
         /// Named pipe (first-in, first-out) type.
-        Fifo = bindings::DT_FIFO,
+        Fifo = ffi::DT_FIFO,
 
         /// Character device type.
-        Chr = bindings::DT_CHR,
+        Chr = ffi::DT_CHR,
 
         /// Directory type.
-        Dir = bindings::DT_DIR,
+        Dir = ffi::DT_DIR,
 
         /// Block device type.
-        Blk = bindings::DT_BLK,
+        Blk = ffi::DT_BLK,
 
         /// Regular file type.
-        Reg = bindings::DT_REG,
+        Reg = ffi::DT_REG,
 
         /// Symbolic link type.
-        Lnk = bindings::DT_LNK,
+        Lnk = ffi::DT_LNK,
 
         /// Named unix-domain socket type.
-        Sock = bindings::DT_SOCK,
+        Sock = ffi::DT_SOCK,
 
         /// White-out type.
-        Wht = bindings::DT_WHT,
+        Wht = ffi::DT_WHT,
     }
 
     struct MemCache {
-        ptr: *mut bindings::kmem_cache,
+        ptr: *mut ffi::kmem_cache,
     }
 
     impl MemCache {
@@ -106,14 +105,11 @@ pub mod ro {
         ) -> Result<Self> {
             // SAFETY: `name` is static, so always valid.
             let ptr = unsafe {
-                bindings2::kmem_cache_create(
+                ffi::kmem_cache_create(
                     name.as_char_ptr() as *const i8,
                     size_of::<T>(),
                     align_of::<T>(),
-                    (bindings2::SLAB_RECLAIM_ACCOUNT
-                        // | bindings::SLAB_MEM_SPREAD
-                        | bindings2::SLAB_ACCOUNT)
-                        .into(),
+                    (ffi::SLAB_RECLAIM_ACCOUNT | ffi::SLAB_ACCOUNT).into(),
                     init,
                 )
             };
@@ -122,11 +118,11 @@ pub mod ro {
             }
 
             Ok(Self {
-                ptr: ptr as *mut bindings::kmem_cache,
+                ptr: ptr as *mut ffi::kmem_cache,
             })
         }
 
-        fn ptr(c: &Option<Self>) -> *mut bindings::kmem_cache {
+        fn ptr(c: &Option<Self>) -> *mut ffi::kmem_cache {
             match c {
                 Some(m) => m.ptr,
                 None => ptr::null_mut(),
@@ -136,7 +132,7 @@ pub mod ro {
 
     impl Drop for MemCache {
         fn drop(&mut self) {
-            unsafe { bindings::kmem_cache_destroy(self.ptr) };
+            unsafe { ffi::kmem_cache_destroy(self.ptr) };
         }
     }
 
@@ -144,7 +140,7 @@ pub mod ro {
     #[pin_data(PinnedDrop)]
     pub struct Registration {
         #[pin]
-        fs: Opaque<bindings2::file_system_type>,
+        fs: Opaque<ffi::file_system_type>,
         inode_cache: Option<MemCache>,
         #[pin]
         _pin: PhantomPinned,
@@ -174,24 +170,24 @@ pub mod ro {
                 fs <- Opaque::try_ffi_init(|fs_ptr| {
                     // SAFETY: `pin_init_from_closure` guarantees that `fs_ptr` is valid for write.
                     let fs = unsafe { &mut *fs_ptr };
-                    *fs = bindings2::file_system_type::default();
-                    fs.owner = module.as_ptr() as *mut bindings2::module;
+                    *fs = ffi::file_system_type::default();
+                    fs.owner = module.as_ptr() as *mut ffi::module;
                     fs.name = T::NAME.as_char_ptr();
                     fs.init_fs_context = Some(Self::init_fs_context_callback::<T>);
                     fs.kill_sb = Some(Self::kill_sb_callback::<T>);
                     fs.fs_flags = if let Super::BlockDev = T::SUPER_TYPE {
-                        bindings::FS_REQUIRES_DEV as i32
+                        ffi::FS_REQUIRES_DEV as i32
                     } else { 0 };
 
                     // SAFETY: Pointers stored in `fs` are static so will live for as long as the
                     // registration is active (it is undone in `drop`).
-                    to_result(unsafe { bindings::register_filesystem(fs_ptr as *mut bindings::file_system_type) })
+                    to_result(unsafe { ffi::register_filesystem(fs_ptr as *mut rinux_bindings::file_system_type) })
                 }),
             })
         }
 
         unsafe extern "C" fn init_fs_context_callback<T: Type + ?Sized>(
-            fc_ptr: *mut bindings2::fs_context,
+            fc_ptr: *mut ffi::fs_context,
         ) -> core::ffi::c_int {
             from_result(|| {
                 // SAFETY: The C callback API guarantees that `fc_ptr` is valid.
@@ -201,16 +197,10 @@ pub mod ro {
             })
         }
 
-        unsafe extern "C" fn kill_sb_callback<T: Type + ?Sized>(
-            sb_ptr: *mut bindings2::super_block,
-        ) {
+        unsafe extern "C" fn kill_sb_callback<T: Type + ?Sized>(sb_ptr: *mut ffi::super_block) {
             match T::SUPER_TYPE {
-                Super::BlockDev => unsafe {
-                    bindings::kill_block_super(sb_ptr as *mut bindings::super_block)
-                },
-                Super::Independent => unsafe {
-                    bindings::kill_anon_super(sb_ptr as *mut bindings::super_block)
-                },
+                Super::BlockDev => unsafe { ffi::kill_block_super(sb_ptr as *mut _) },
+                Super::Independent => unsafe { ffi::kill_anon_super(sb_ptr as *mut _) },
             }
 
             let ptr = unsafe { (*sb_ptr).s_fs_info };
@@ -229,18 +219,14 @@ pub mod ro {
             let ptr = outer_inode.cast::<INodeWithData<T::INodeData>>();
             // This is only used in `new`, so we know that we have a valid `INodeWithData`
             // instance whose inode part can be initialised.
-            unsafe {
-                bindings::inode_init_once(ptr::addr_of_mut!((*ptr).inode) as *mut bindings::inode)
-            };
+            unsafe { ffi::inode_init_once(ptr::addr_of_mut!((*ptr).inode) as *mut _) };
         }
     }
 
     #[pinned_drop]
     impl PinnedDrop for Registration {
         fn drop(self: Pin<&mut Self>) {
-            unsafe {
-                bindings::unregister_filesystem(self.fs.get() as *mut bindings::file_system_type)
-            };
+            unsafe { ffi::unregister_filesystem(self.fs.get() as *mut _) };
         }
     }
 
@@ -251,7 +237,7 @@ pub mod ro {
     /// Instances of this type are always ref-counted, that is, a call to `ihold` ensures that the
     /// allocation remains valid at least until the matching call to `iput`.
     #[repr(transparent)]
-    pub struct INode<T: Type + ?Sized>(Opaque<bindings2::inode>, PhantomData<T>);
+    pub struct INode<T: Type + ?Sized>(Opaque<ffi::inode>, PhantomData<T>);
 
     impl<T: Type + ?Sized> INode<T> {
         /// Returns the number of the inode.
@@ -277,18 +263,18 @@ pub mod ro {
     unsafe impl<T: Type + ?Sized> AlwaysRefCounted for INode<T> {
         fn inc_ref(&self) {
             // SAFETY: The existence of a shared reference means that the refcount is nonzero.
-            unsafe { bindings::ihold(self.0.get() as *mut bindings::inode) };
+            unsafe { ffi::ihold(self.0.get() as *mut _) };
         }
 
         unsafe fn dec_ref(obj: ptr::NonNull<Self>) {
             // SAFETY: The safety requirements guarantee that the refcount is nonzero.
-            unsafe { bindings::iput(obj.cast().as_ptr()) }
+            unsafe { ffi::iput(obj.cast().as_ptr()) }
         }
     }
 
     struct INodeWithData<T> {
         data: MaybeUninit<T>,
-        inode: bindings2::inode,
+        inode: ffi::inode,
     }
 
     /// An inode that is locked and hasn't been initialised yet.
@@ -315,47 +301,39 @@ pub mod ro {
                 INodeType::Dir => {
                     inode.__bindgen_anon_3.i_fop = &Tables::<T>::DIR_FILE_OPERATIONS;
                     inode.i_op = &Tables::<T>::DIR_INODE_OPERATIONS;
-                    bindings::S_IFDIR
+                    ffi::S_IFDIR
                 }
                 INodeType::Reg => {
-                    inode.__bindgen_anon_3.i_fop = unsafe { &bindings2::generic_ro_fops };
+                    inode.__bindgen_anon_3.i_fop = unsafe { &ffi::generic_ro_fops };
                     inode.i_data.a_ops = &Tables::<T>::FILE_ADDRESS_SPACE_OPERATIONS;
-                    unsafe { bindings2::mapping_set_large_folios(inode.i_mapping as *mut _) };
-                    bindings::S_IFREG
+                    unsafe { ffi::mapping_set_large_folios(inode.i_mapping as *mut _) };
+                    ffi::S_IFREG
                 }
                 INodeType::Lnk => {
                     inode.i_op = &Tables::<T>::LNK_INODE_OPERATIONS;
                     inode.i_data.a_ops = &Tables::<T>::FILE_ADDRESS_SPACE_OPERATIONS;
-                    unsafe { bindings2::inode_nohighmem(inode) };
-                    bindings::S_IFLNK
+                    unsafe { ffi::inode_nohighmem(inode) };
+                    ffi::S_IFLNK
                 }
                 INodeType::Fifo => {
-                    unsafe { bindings2::init_special_inode(inode, bindings::S_IFIFO as _, 0) };
-                    bindings::S_IFIFO
+                    unsafe { ffi::init_special_inode(inode, ffi::S_IFIFO as _, 0) };
+                    ffi::S_IFIFO
                 }
                 INodeType::Sock => {
-                    unsafe { bindings2::init_special_inode(inode, bindings::S_IFSOCK as _, 0) };
-                    bindings::S_IFSOCK
+                    unsafe { ffi::init_special_inode(inode, ffi::S_IFSOCK as _, 0) };
+                    ffi::S_IFSOCK
                 }
                 INodeType::Chr(major, minor) => {
                     unsafe {
-                        bindings2::init_special_inode(
-                            inode,
-                            bindings::S_IFCHR as _,
-                            bindings2::mkdev(major, minor),
-                        )
+                        ffi::init_special_inode(inode, ffi::S_IFCHR as _, ffi::mkdev(major, minor))
                     };
-                    bindings::S_IFCHR
+                    ffi::S_IFCHR
                 }
                 INodeType::Blk(major, minor) => {
                     unsafe {
-                        bindings2::init_special_inode(
-                            inode,
-                            bindings::S_IFBLK as _,
-                            bindings2::mkdev(major, minor),
-                        )
+                        ffi::init_special_inode(inode, ffi::S_IFBLK as _, ffi::mkdev(major, minor))
                     };
-                    bindings::S_IFBLK
+                    ffi::S_IFBLK
                 }
             };
 
@@ -371,22 +349,18 @@ pub mod ro {
             inode.i_size = params.size;
             inode.i_blocks = params.blocks;
 
-            unsafe { bindings2::set_nlink(inode, params.nlink) };
-            unsafe {
-                bindings2::i_uid_write(inode as *mut _ as *mut core::ffi::c_void, params.uid)
-            };
-            unsafe {
-                bindings2::i_gid_write(inode as *mut _ as *mut core::ffi::c_void, params.gid)
-            };
+            unsafe { ffi::set_nlink(inode, params.nlink) };
+            unsafe { ffi::i_uid_write(inode as *mut _ as *mut core::ffi::c_void, params.uid) };
+            unsafe { ffi::i_gid_write(inode as *mut _ as *mut core::ffi::c_void, params.gid) };
 
-            unsafe { bindings2::unlock_new_inode(inode) };
+            unsafe { ffi::unlock_new_inode(inode) };
             Ok(unsafe { ((&ManuallyDrop::new(self).0) as *const ARef<INode<T>>).read() })
         }
     }
 
     impl<T: Type + ?Sized> Drop for NewINode<T> {
         fn drop(&mut self) {
-            unsafe { bindings::iget_failed(self.0.0.get() as *mut bindings::inode) };
+            unsafe { ffi::iget_failed(self.0.0.get() as *mut _) };
         }
     }
 
@@ -394,7 +368,7 @@ pub mod ro {
     ///
     /// Wraps the kernel's `struct super_block`.
     #[repr(transparent)]
-    pub struct SuperBlock<T: Type + ?Sized>(Opaque<bindings2::super_block>, PhantomData<T>);
+    pub struct SuperBlock<T: Type + ?Sized>(Opaque<ffi::super_block>, PhantomData<T>);
 
     impl<T: Type + ?Sized> SuperBlock<T> {
         /// Returns the data associated with the superblock.
@@ -405,12 +379,14 @@ pub mod ro {
 
         /// Tries to get an existing inode or create a new one if it doesn't exist yet.
         pub fn get_or_create_inode(&self, ino: u64) -> Result<Either<ARef<INode<T>>, NewINode<T>>> {
-            let inode = ptr::NonNull::new(unsafe {
-                bindings::iget_locked(self.0.get() as *mut bindings::super_block, ino as usize)
-            } as *mut bindings2::inode)
-            .ok_or(ENOMEM)?;
+            let inode =
+                ptr::NonNull::new(
+                    unsafe { ffi::iget_locked(self.0.get() as *mut _, ino as usize) }
+                        as *mut ffi::inode,
+                )
+                .ok_or(ENOMEM)?;
 
-            if unsafe { inode.as_ref().i_state & bindings2::inode_state_flags_t_I_NEW == 0 } {
+            if unsafe { inode.as_ref().i_state & ffi::inode_state_flags_t_I_NEW == 0 } {
                 // The inode is cached. Just return it.
                 //
                 // SAFETY: `inode` had its refcount incremented by `iget_locked`; this increment is
@@ -527,8 +503,8 @@ pub mod ro {
         /// Default value for instances of [`SuperParams`].
         pub const DEFAULT: Self = Self {
             magic: 0,
-            blocksize_bits: bindings::PAGE_SIZE as _,
-            maxbytes: bindings2::MAX_LFS_FILESIZE,
+            blocksize_bits: ffi::PAGE_SIZE as _,
+            maxbytes: ffi::MAX_LFS_FILESIZE,
             time_gran: 1,
         };
     }
@@ -554,7 +530,7 @@ pub mod ro {
         ///
         /// `sb` must point to a newly-created superblock and it must be the only active pointer to
         /// it.
-        unsafe fn new(sb: *mut bindings2::super_block) -> Self {
+        unsafe fn new(sb: *mut ffi::super_block) -> Self {
             // INVARIANT: The invariants are satisfied by the safety requirements of this function.
             Self {
                 // SAFETY: The safety requirements ensure that `sb` is valid for dereference.
@@ -602,9 +578,8 @@ pub mod ro {
 
             // SAFETY: The caller owns a reference to the inode, so it is valid. The reference is
             // transferred to the callee.
-            let dentry = unsafe {
-                bindings::d_make_root(ManuallyDrop::new(inode).0.get() as *mut bindings::inode)
-            } as *mut bindings2::dentry;
+            let dentry = unsafe { ffi::d_make_root(ManuallyDrop::new(inode).0.get() as *mut _) }
+                as *mut ffi::dentry;
             if dentry.is_null() {
                 return Err(ENOMEM);
             }
@@ -631,7 +606,7 @@ pub mod ro {
 
     struct Tables<T: Type + ?Sized>(T);
     impl<T: Type + ?Sized> Tables<T> {
-        const CONTEXT: bindings2::fs_context_operations = bindings2::fs_context_operations {
+        const CONTEXT: ffi::fs_context_operations = ffi::fs_context_operations {
             free: None,
             parse_param: None,
             get_tree: Some(Self::get_tree_callback),
@@ -640,24 +615,24 @@ pub mod ro {
             dup: None,
         };
 
-        unsafe extern "C" fn get_tree_callback(fc: *mut bindings2::fs_context) -> core::ffi::c_int {
+        unsafe extern "C" fn get_tree_callback(fc: *mut ffi::fs_context) -> core::ffi::c_int {
             match T::SUPER_TYPE {
                 // SAFETY: `fc` is valid per the callback contract. `fill_super_callback` also has
                 // the right type and is a valid callback.
                 Super::BlockDev => unsafe {
-                    bindings2::get_tree_bdev(fc, Some(Self::fill_super_callback))
+                    ffi::get_tree_bdev(fc, Some(Self::fill_super_callback))
                 },
                 // SAFETY: `fc` is valid per the callback contract. `fill_super_callback` also has
                 // the right type and is a valid callback.
                 Super::Independent => unsafe {
-                    bindings2::get_tree_nodev(fc, Some(Self::fill_super_callback))
+                    ffi::get_tree_nodev(fc, Some(Self::fill_super_callback))
                 },
             }
         }
 
         unsafe extern "C" fn fill_super_callback(
-            sb_ptr: *mut bindings2::super_block,
-            _fc: *mut bindings2::fs_context,
+            sb_ptr: *mut ffi::super_block,
+            _fc: *mut ffi::fs_context,
         ) -> core::ffi::c_int {
             from_result(|| {
                 // SAFETY: The callback contract guarantees that `sb_ptr` is a unique pointer to a
@@ -668,7 +643,7 @@ pub mod ro {
             })
         }
 
-        const SUPER_BLOCK: bindings2::super_operations = bindings2::super_operations {
+        const SUPER_BLOCK: ffi::super_operations = ffi::super_operations {
             alloc_inode: if size_of::<T::INodeData>() != 0 {
                 Some(Self::alloc_inode_callback)
             } else {
@@ -709,9 +684,7 @@ pub mod ro {
             remove_bdev: None,
         };
 
-        unsafe extern "C" fn alloc_inode_callback(
-            sb: *mut bindings2::super_block,
-        ) -> *mut bindings2::inode {
+        unsafe extern "C" fn alloc_inode_callback(sb: *mut ffi::super_block) -> *mut ffi::inode {
             // SAFETY: The callback contract guarantees that `sb` is valid for read.
             let super_type = unsafe { (*sb).s_type };
 
@@ -723,10 +696,10 @@ pub mod ro {
             // SAFETY: `sb` and `cache` are guaranteed to be valid by the callback contract and by
             // the existence of a superblock respectively.
             let ptr = unsafe {
-                bindings2::alloc_inode_sb(
+                ffi::alloc_inode_sb(
                     sb as *mut core::ffi::c_void,
                     MemCache::ptr(&reg.inode_cache) as *mut core::ffi::c_void,
-                    bindings::GFP_KERNEL,
+                    ffi::GFP_KERNEL,
                 )
             }
             .cast::<INodeWithData<T::INodeData>>();
@@ -736,9 +709,9 @@ pub mod ro {
             unsafe { ptr::addr_of_mut!((*ptr).inode) }
         }
 
-        unsafe extern "C" fn destroy_inode_callback(inode: *mut bindings2::inode) {
+        unsafe extern "C" fn destroy_inode_callback(inode: *mut ffi::inode) {
             // SAFETY: By the C contrat, inode is a valid pointer.
-            let is_bad = unsafe { bindings::is_bad_inode(inode as *mut bindings::inode) };
+            let is_bad = unsafe { ffi::is_bad_inode(inode as *mut _) };
 
             // SAFETY: The inode is guaranteed to be valid by the callback contract. Additionally, the
             // superblock is also guaranteed to still be valid by the inode existence.
@@ -759,13 +732,13 @@ pub mod ro {
 
             // The callback contract guarantees that the inode was previously allocated via the
             // `alloc_inode_callback` callback, so it is safe to free it back to the cache.
-            unsafe { bindings::kmem_cache_free(MemCache::ptr(&reg.inode_cache), ptr.cast()) };
+            unsafe { ffi::kmem_cache_free(MemCache::ptr(&reg.inode_cache), ptr.cast()) };
         }
 
-        const DIR_FILE_OPERATIONS: bindings2::file_operations = bindings2::file_operations {
+        const DIR_FILE_OPERATIONS: ffi::file_operations = ffi::file_operations {
             owner: ptr::null_mut(),
-            llseek: Some(bindings2::generic_file_llseek),
-            read: Some(bindings2::generic_read_dir),
+            llseek: Some(ffi::generic_file_llseek),
+            read: Some(ffi::generic_read_dir),
             write: None,
             read_iter: None,
             write_iter: None,
@@ -801,8 +774,8 @@ pub mod ro {
         };
 
         unsafe extern "C" fn read_dir_callback(
-            file: *mut bindings2::file,
-            ctx_ptr: *mut bindings2::dir_context,
+            file: *mut ffi::file,
+            ctx_ptr: *mut ffi::dir_context,
         ) -> core::ffi::c_int {
             from_result(|| {
                 let inode = unsafe { &*(*file).f_inode.cast::<INode<T>>() };
@@ -822,7 +795,7 @@ pub mod ro {
             })
         }
 
-        const DIR_INODE_OPERATIONS: bindings2::inode_operations = bindings2::inode_operations {
+        const DIR_INODE_OPERATIONS: ffi::inode_operations = ffi::inode_operations {
             lookup: Some(Self::lookup_callback),
             get_link: None,
             permission: None,
@@ -851,10 +824,10 @@ pub mod ro {
         };
 
         extern "C" fn lookup_callback(
-            parent_ptr: *mut bindings2::inode,
-            dentry: *mut bindings2::dentry,
+            parent_ptr: *mut ffi::inode,
+            dentry: *mut ffi::dentry,
             _flags: u32,
-        ) -> *mut bindings2::dentry {
+        ) -> *mut ffi::dentry {
             let parent = unsafe { &*parent_ptr.cast::<INode<T>>() };
             let Ok(name_len) = usize::try_from(unsafe {
                 (*dentry)
@@ -872,17 +845,17 @@ pub mod ro {
             match T::lookup(parent, name) {
                 Err(e) => e.to_ptr(),
                 Ok(inode) => unsafe {
-                    bindings::d_splice_alias(
-                        ManuallyDrop::new(inode).0.get() as *mut bindings::inode,
-                        dentry as *mut bindings::dentry,
-                    ) as *mut bindings2::dentry
+                    ffi::d_splice_alias(
+                        ManuallyDrop::new(inode).0.get() as *mut _,
+                        dentry as *mut _,
+                    ) as *mut ffi::dentry
                 },
             }
         }
 
-        const LNK_INODE_OPERATIONS: bindings2::inode_operations = bindings2::inode_operations {
+        const LNK_INODE_OPERATIONS: ffi::inode_operations = ffi::inode_operations {
             lookup: None,
-            get_link: Some(bindings2::page_get_link),
+            get_link: Some(ffi::page_get_link),
             permission: None,
             get_inode_acl: None,
             readlink: None,
@@ -908,8 +881,8 @@ pub mod ro {
             get_offset_ctx: None,
         };
 
-        const FILE_ADDRESS_SPACE_OPERATIONS: bindings2::address_space_operations =
-            bindings2::address_space_operations {
+        const FILE_ADDRESS_SPACE_OPERATIONS: ffi::address_space_operations =
+            ffi::address_space_operations {
                 // writepage: None,
                 read_folio: Some(Self::read_folio_callback),
                 writepages: None,
@@ -934,8 +907,8 @@ pub mod ro {
             };
 
         unsafe extern "C" fn read_folio_callback(
-            _file: *mut bindings2::file,
-            folio: *mut bindings2::folio,
+            _file: *mut ffi::file,
+            folio: *mut ffi::folio,
         ) -> i32 {
             from_result(|| {
                 let inode = unsafe {

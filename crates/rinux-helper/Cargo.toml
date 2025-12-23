@@ -8,4 +8,4 @@ test = false
 bench = false
 
 [build-dependencies]
-cc = "1"
+bindgen.workspace = true

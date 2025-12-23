@@ -1,12 +1,12 @@
 #![no_std]
 
-pub mod ffi;
-
 pub mod folio;
 
 pub mod fs;
 
 pub use kernel::macros;
+
+pub(crate) mod ffi;
 
 pub enum Either<L, R> {
     /// Left value.

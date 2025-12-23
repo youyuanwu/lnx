@@ -3,11 +3,14 @@ resolver = "2"
 
 members = [
   # "external/e1000"
-  "crates/rinux-bindings"
-  , "crates/rinux-fs", "crates/rinux-helper", "crates/rinux-kernel"
-  , "samples/einux-kmod"
-  , "samples/einux-vec"
-, "samples/rinux-rofs"]
+  "crates/rinux-bindings",
+  "crates/rinux-fs",
+  "crates/rinux-helper",
+  "crates/rinux-kernel",
+  "samples/einux-kmod",
+  "samples/einux-vec",
+  "samples/rinux-rofs",
+]
 
 [workspace.dependencies]
 rinux-bindings = { path = "crates/rinux-bindings" }
