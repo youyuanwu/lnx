@@ -82,7 +82,7 @@ pub struct RxDesc {
 impl<K: KernelFunc> E1000Device<'_, K> {
     /// New an e1000 device by Allocating memory
     pub fn new(mut kfn: K, mapped_regs: usize) -> Result<Self, Error> {
-        info!("New E1000 device @ {:#x}", mapped_regs);
+        pr_info!("New E1000 device @ {:#x}", mapped_regs);
         // 分配的ring内存空间需要16字节对齐
         let (tx_ring_vaddr, tx_ring_dma) = kfn.dma_alloc_coherent(ALLOC_TX_RING_PAGES);
         let (rx_ring_vaddr, rx_ring_dma) = kfn.dma_alloc_coherent(ALLOC_RX_RING_PAGES);
@@ -184,7 +184,7 @@ impl<K: KernelFunc> E1000Device<'_, K> {
     fn e1000_init(&mut self) {
         let stat = self.regs[E1000_STAT].read();
         let ctl = self.regs[E1000_CTL].read();
-        info!("e1000 CTL: {:#x}, Status: {:#x}", ctl, stat);
+        pr_info!("e1000 CTL: {:#x}, Status: {:#x}", ctl, stat);
 
         // Reset the device
         self.regs[E1000_IMS].write(0); // disable interrupts
@@ -196,9 +196,9 @@ impl<K: KernelFunc> E1000Device<'_, K> {
         fence_w();
 
         // [E1000 14.5] Transmit initialization
-        if (core::mem::size_of_val(self.tx_ring)) % 128 != 0 {
+        if !(core::mem::size_of_val(self.tx_ring)).is_multiple_of(128) {
             //panic("e1000");
-            error!("e1000, size of tx_ring is invalid");
+            pr_err!("e1000, size of tx_ring is invalid");
         }
 
         // transmitter control bits.
@@ -218,9 +218,9 @@ impl<K: KernelFunc> E1000Device<'_, K> {
         self.regs[E1000_TDH].write(0); // TX Desc Head
 
         // [E1000 14.4] Receive initialization
-        info!("rx ring 0: {:x?}", self.rx_ring[0]);
-        if (core::mem::size_of_val(self.rx_ring)) % 128 != 0 {
-            error!("e1000, size of rx_ring is invalid");
+        pr_info!("rx ring 0: {:x?}", self.rx_ring[0]);
+        if !(core::mem::size_of_val(self.rx_ring)).is_multiple_of(128) {
+            pr_err!("e1000, size of rx_ring is invalid");
         }
 
         // receiver control bits.
@@ -234,7 +234,7 @@ impl<K: KernelFunc> E1000Device<'_, K> {
             ) & !(0b11 << 10), // Just for e1000e DTYP bits[11:10]=00 : Legacy description type
         );
         self.regs[E1000_RFCTL].write(0); //e1000e RFCTL.EXSTEN bits[15]=0 : Legacy Desc
-        info!(
+        pr_info!(
             "e1000 RCTL: {:#x}, RFCTL: {:#x}",
             self.regs[E1000_RCTL].read(),
             self.regs[E1000_RFCTL].read()
@@ -270,30 +270,30 @@ impl<K: KernelFunc> E1000Device<'_, K> {
 
         self.regs[E1000_ICR].read(); // clear ints
         self.e1000_write_flush();
-        info!("e1000_init has been completed");
+        pr_info!("e1000_init has been completed");
     }
 
     /// Transmitting network packets
     pub fn e1000_transmit(&mut self, packet: &[u8]) -> i32 {
         let tindex = self.regs[E1000_TDT].read() as usize;
-        info!("Read E1000_TDT = {:#x}", tindex);
+        pr_info!("Read E1000_TDT = {:#x}", tindex);
         //info!("TX Desc = {:#x?}", self.tx_ring[tindex]);
         if (self.tx_ring[tindex].status & E1000_TXD_STAT_DD as u8) == 0 {
-            error!("E1000 hasn't finished the corresponding previous transmission request");
+            pr_err!("E1000 hasn't finished the corresponding previous transmission request");
             return -1;
         }
 
         let mut length = packet.len();
         if length > self.mbuf_size {
-            error!("The packet: {} to be send is TOO LARGE", length);
+            pr_err!("The packet: {} to be send is TOO LARGE", length);
             length = min(length, self.mbuf_size);
         }
 
         let mbuf = unsafe { from_raw_parts_mut(self.tx_mbufs[tindex] as *mut u8, length) };
         mbuf.copy_from_slice(packet);
 
-        info!(">>>>>>>>> TX PKT {}", length);
-        info!("\n\r");
+        pr_info!(">>>>>>>>> TX PKT {}", length);
+        pr_info!("\n\r");
         //print_hex_dump(tx_mbuf, 64);
 
         self.tx_ring[tindex].length = length as u16;
@@ -318,23 +318,23 @@ impl<K: KernelFunc> E1000Device<'_, K> {
         let mut recv_packets = Vec::new();
         let mut rindex = (self.regs[E1000_RDT].read() as usize + 1) % RX_RING_SIZE;
 
-        //info!("RX Desc {} = {:#x?}", rindex, self.rx_ring[rindex]);
+        //pr_info!("RX Desc {} = {:#x?}", rindex, self.rx_ring[rindex]);
         if self.rx_ring[rindex].addr == 0 {
-            error!("E1000 RX Desc.addr is invalid");
+            pr_err!("E1000 RX Desc.addr is invalid");
             return None;
         }
 
         // DD设为1时，内存中的接收包是完整的
         while (self.rx_ring[rindex].status & E1000_RXD_STAT_DD as u8) != 0 {
-            info!("Read E1000_RDT + 1 = {:#x}", rindex);
+            pr_info!("Read E1000_RDT + 1 = {:#x}", rindex);
             let mut len = self.rx_ring[rindex].length as usize;
             if len > self.mbuf_size {
-                error!("The packet: {} received is TOO LARGE", len);
+                pr_err!("The packet: {} received is TOO LARGE", len);
                 len = self.mbuf_size;
             }
 
             let mbuf = unsafe { from_raw_parts_mut(self.rx_mbufs[rindex] as *mut u8, len) };
-            info!("RX PKT {} <<<<<<<<<", len);
+            pr_info!("RX PKT {} <<<<<<<<<", len);
             //recv_packets.push_back(mbuf.to_vec());
             let mut vec_mbuf = Vec::new();
             vec_mbuf.extend_from_slice(mbuf, GFP_KERNEL).unwrap();
@@ -356,7 +356,7 @@ impl<K: KernelFunc> E1000Device<'_, K> {
 
             rindex = (rindex + 1) % RX_RING_SIZE;
         }
-        info!("e1000_recv\n\r");
+        pr_info!("e1000_recv\n\r");
 
         if recv_packets.is_empty() {
             Some(recv_packets)
@@ -431,7 +431,7 @@ pub fn net_rx(packet: &mut [u8]) {
 
 impl<K: KernelFunc> Drop for E1000Device<'_, K> {
     fn drop(&mut self) {
-        debug!("Drop DMA memory");
+        pr_info!("Drop DMA memory");
         self.kfn
             .dma_free_coherent(self.tx_ring.as_ptr() as usize, ALLOC_TX_RING_PAGES);
         self.kfn

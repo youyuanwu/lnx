@@ -1,4 +1,4 @@
-use core::arch::asm;
+// use core::arch::asm;
 
 pub(crate) fn fence() {
     #[cfg(target_arch = "riscv64")]

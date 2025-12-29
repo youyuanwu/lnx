@@ -30,6 +30,7 @@ add_custom_target(fmt_all)
 add_subdirectory(external/kmods)
 add_subdirectory(samples/einux-kmod)
 add_subdirectory(samples/rinux-rofs)
+add_subdirectory(samples/e1000)
 
 # copy stuff in image
 # mount

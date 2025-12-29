@@ -17,6 +17,9 @@ write ../build/bin_kmods/e1000_for_linux.ko e1000_for_linux.ko
 rm rinux_rofs.ko
 write ../build/bin_kmods/rinux_rofs.ko rinux_rofs.ko
 
+rm e1000_for_linux.ko
+write ../build/bin_kmods/e1000_for_linux.ko e1000_for_linux.ko
+
 cd /etc
 rm modules
 write ../data/modules.conf modules

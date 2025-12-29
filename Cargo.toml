@@ -2,6 +2,7 @@
 resolver = "2"
 
 members = [
+  "samples/e1000",
   # "external/e1000"
   "crates/rinux-bindings",
   "crates/rinux-fs",

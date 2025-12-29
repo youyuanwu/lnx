@@ -1,5 +1,5 @@
-#![cfg_attr(feature = "const_fn", feature(const_fn))]
-#![no_std]
+// #![cfg_attr(feature = "const_fn", feature(const_fn))]
+// #![no_std]
 
 use core::ptr;
 

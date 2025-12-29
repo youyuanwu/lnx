@@ -1,4 +1,6 @@
+#![no_std]
 //! Rust e1000 network device.
+
 #![allow(unused)]
 #![allow(missing_docs)]
 
@@ -21,6 +23,12 @@ pub mod utils;
 
 use e1000::E1000Device;
 
+use core::{
+    option::Option::{self, None, Some},
+    result::Result::{Err, Ok},
+    *,
+};
+
 // const RXBUFFER: u32 = 2048;
 // /// Intel E1000 ID
 // const VENDOR_ID_INTEL: u32 = 0x8086;
@@ -34,7 +42,7 @@ use e1000::E1000Device;
 kernel::module_pci_driver! {
     type: E1000Driver,
     name: "rust_e1000dev",
-    author: "Luoyuan Xiao",
+    authors: ["Luoyuan Xiao"],
     description: "Rust e1000 device driver",
     license: "GPL",
 }
@@ -52,8 +60,8 @@ impl Regs {
 type Bar0 = pci::Bar<{ Regs::END }>;
 
 struct E1000Driver {
-    pdev: ARef<pci::Device>,
-    bar: Devres<Bar0>,
+    _pdev: ARef<pci::Device>,
+    _bar: Pin<KBox<Devres<Bar0>>>,
     inner: E1000Device<'static, Kernfn>,
 }
 
@@ -67,11 +75,17 @@ impl e1000::KernelFunc for Kernfn {
     const PAGE_SIZE: usize = 1 << 12;
 
     fn dma_alloc_coherent(&mut self, pages: usize) -> (usize, usize) {
-        let alloc = dma::CoherentAllocation::<u8>::alloc_coherent(
-            self.dev.as_ref(),
-            pages * Self::PAGE_SIZE,
-            GFP_KERNEL,
-        )
+        // SAFETY: We transmute the device reference to Bound state. This is safe because
+        // the device was properly bound during probe() when enable_device_mem() was called.
+        // The pci device is valid for DMA operations.
+        let dev_ref = self.dev.as_ref() as *const _ as *const device::Device<device::Bound>;
+        let alloc = unsafe {
+            dma::CoherentAllocation::<u8>::alloc_coherent(
+                &*dev_ref,
+                pages * Self::PAGE_SIZE,
+                GFP_KERNEL,
+            )
+        }
         .unwrap();
 
         let vaddr = alloc.start_ptr() as usize;
@@ -96,9 +110,7 @@ impl e1000::KernelFunc for Kernfn {
             // move to last
             let old_len = self.alloc_coherent.len();
             self.alloc_coherent.swap(i, old_len - 1);
-            let last = self.alloc_coherent.last_mut().unwrap();
-            last.take();
-            unsafe { self.alloc_coherent.set_len(old_len - 1) };
+            self.alloc_coherent.pop();
         }
     }
 }
@@ -116,15 +128,15 @@ kernel::pci_device_table!(
     // Id for the device.
     [
         (
-            (pci::DeviceId::from_id(bindings::PCI_VENDOR_ID_INTEL, DEVICE_ID_INTEL_I219)),
+            (pci::DeviceId::from_id(pci::Vendor::INTEL, DEVICE_ID_INTEL_I219)),
             ()
         ),
         (
-            (pci::DeviceId::from_id(bindings::PCI_VENDOR_ID_INTEL, DEVICE_ID_INTEL_82540EM)),
+            (pci::DeviceId::from_id(pci::Vendor::INTEL, DEVICE_ID_INTEL_82540EM)),
             ()
         ),
         (
-            (pci::DeviceId::from_id(bindings::PCI_VENDOR_ID_INTEL, DEVICE_ID_INTEL_82574L)),
+            (pci::DeviceId::from_id(pci::Vendor::INTEL, DEVICE_ID_INTEL_82574L)),
             ()
         )
     ]
@@ -140,15 +152,35 @@ impl pci::Driver for E1000Driver {
         pdev.enable_device_mem()?;
         pdev.set_master();
 
-        let bar = pdev.iomap_region_sized::<{ Regs::END }>(0, c_str!("rust_e1000dev"))?;
+        // Initialize the bar resource first
+        let bar_init = pdev.iomap_region_sized::<{ Regs::END }>(0, c_str!("rust_e1000dev"));
+        let bar_box = KBox::pin_init(bar_init, GFP_KERNEL)?;
 
-        let lk_bar = bar.try_access().ok_or(ENXIO)?;
+        // Get the register address from the bar
+        let lk_bar = bar_box.try_access().ok_or(ENXIO)?;
+        let regs = lk_bar.addr();
+
+        // Create the pdev ARef
+        let pdev_aref: ARef<pci::Device> = pdev.into();
+
+        // Create the kernel functions
         let kfn = Kernfn {
-            dev: pdev.into(),
+            dev: pdev_aref.clone(),
             alloc_coherent: Vec::new(),
         };
-        let regs = lk_bar.addr();
-        let mut e1000_device = E1000Device::<Kernfn>::new(kfn, regs).unwrap();
+
+        // Initialize the E1000 device
+        let e1000_device = E1000Device::<Kernfn>::new(kfn, regs).unwrap();
+
+        // Create the driver data structure
+        let drvdata = KBox::pin_init(
+            Self {
+                _pdev: pdev_aref,
+                _bar: bar_box,
+                inner: e1000_device,
+            },
+            GFP_KERNEL,
+        )?;
 
         let wq = workqueue::system();
         wq.try_spawn(GFP_KERNEL, || {
@@ -157,15 +189,6 @@ impl pci::Driver for E1000Driver {
         })
         .unwrap();
 
-        let drvdata = Box::new(
-            Self {
-                pdev: pdev.into(),
-                bar,
-                inner: e1000_device,
-            },
-            GFP_KERNEL,
-        )?;
-
-        Ok(drvdata.into())
+        Ok(drvdata)
     }
 }

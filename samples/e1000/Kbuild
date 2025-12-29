@@ -1,0 +1,7 @@
+# SPDX-License-Identifier: GPL-2.0
+
+obj-m := e1000_for_linux.o
+
+# Use pre-built object file (compiled by cargo in Makefile)
+# Object file is in the MO (module output) directory
+e1000_for_linux-objs := e1000_for_linux_main.o
