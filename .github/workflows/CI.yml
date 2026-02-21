@@ -24,11 +24,11 @@ jobs:
     - name: Install rust stable
       uses: dtolnay/rust-toolchain@stable
       with:
-        toolchain: 1.91.1
+        toolchain: 1.93.0
         components: rustfmt, clippy, rust-src
 
     - name: Set rust version
-      run: rustup override set 1.91.1
+      run: rustup override set 1.93.0
 
     - uses: taiki-e/install-action@v2
       with:

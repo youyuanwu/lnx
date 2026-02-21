@@ -46,7 +46,6 @@ rustflags = [
     
     # Unstable options (require RUSTC_BOOTSTRAP=1 or nightly)
     "-Zcf-protection=branch",
-    "-Zno-jump-tables",
     "-Zfunction-return=thunk-extern",
     "-Zpatchable-function-entry=16,16",
     "-Zallow-features=arbitrary_self_types,used_with_arg",

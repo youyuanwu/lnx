@@ -31,7 +31,6 @@ RUST_CODEGEN_FLAGS := -Cpanic=abort \
 RUST_TARGET_FLAGS := --target=$(KERNEL_BUILD)/scripts/target.json \
 	-Ctarget-feature=-sse,-sse2,-sse3,-ssse3,-sse4.1,-sse4.2,-avx,-avx2 \
 	-Zcf-protection=branch \
-	-Zno-jump-tables \
 	-Ctarget-cpu=x86-64 \
 	-Cno-redzone=y \
 	-Ccode-model=kernel \
