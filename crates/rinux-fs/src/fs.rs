@@ -103,6 +103,7 @@ pub mod ro {
             name: &'static CStr,
             init: Option<unsafe extern "C" fn(*mut core::ffi::c_void)>,
         ) -> Result<Self> {
+            use kernel::str::CStrExt;
             // SAFETY: `name` is static, so always valid.
             let ptr = unsafe {
                 ffi::kmem_cache_create(
@@ -168,6 +169,7 @@ pub mod ro {
                     }
                 },
                 fs <- Opaque::try_ffi_init(|fs_ptr| {
+                    use kernel::str::CStrExt;
                     // SAFETY: `pin_init_from_closure` guarantees that `fs_ptr` is valid for write.
                     let fs = unsafe { &mut *fs_ptr };
                     *fs = ffi::file_system_type::default();
@@ -386,7 +388,7 @@ pub mod ro {
                 )
                 .ok_or(ENOMEM)?;
 
-            if unsafe { inode.as_ref().i_state & ffi::inode_state_flags_t_I_NEW == 0 } {
+            if unsafe { inode.as_ref().i_state.__state == ffi::inode_state_flags_enum_I_NEW } {
                 // The inode is cached. Just return it.
                 //
                 // SAFETY: `inode` had its refcount incremented by `iget_locked`; this increment is

@@ -75,6 +75,7 @@ fn main() {
         .arg("-fno-PIE")
         .arg("-fno-strict-aliasing")
         .arg("-fno-common")
+        .arg("-fms-extensions")
         .arg("-std=gnu11")
         .arg("-w") // Suppress warnings
         .output()
@@ -174,6 +175,7 @@ fn overwrite_bindgen() {
         .generate_comments(false)
         // Match kernel: --enable-function-attribute-detection
         .clang_arg("-fno-builtin")
+        .clang_arg("-fms-extensions")
         .clang_arg("-D__BINDGEN__")
         .clang_arg("-D__KERNEL__")
         .clang_arg("-DMODULE")

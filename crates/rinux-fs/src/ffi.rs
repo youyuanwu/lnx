@@ -4,7 +4,7 @@ pub use rinux_helper::bindings::{
     MAX_LFS_FILESIZE, SLAB_ACCOUNT, SLAB_RECLAIM_ACCOUNT, address_space_operations, dentry,
     dir_context, file, file_operations, file_system_type, folio, fs_context, fs_context_operations,
     generic_file_llseek, generic_read_dir, generic_ro_fops, get_tree_bdev, get_tree_nodev,
-    init_special_inode, inode, inode_nohighmem, inode_operations, inode_state_flags_t_I_NEW,
+    init_special_inode, inode, inode_nohighmem, inode_operations, inode_state_flags_enum_I_NEW,
     module, page_get_link, set_nlink, super_block, super_operations, unlock_new_inode,
 };
 

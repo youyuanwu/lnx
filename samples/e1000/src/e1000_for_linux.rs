@@ -146,7 +146,10 @@ impl pci::Driver for E1000Driver {
     type IdInfo = ();
     const ID_TABLE: pci::IdTable<Self::IdInfo> = &PCI_TABLE;
 
-    fn probe(pdev: &pci::Device<device::Core>, id_info: &Self::IdInfo) -> Result<Pin<KBox<Self>>> {
+    fn probe(
+        pdev: &pci::Device<device::Core>,
+        id_info: &Self::IdInfo,
+    ) -> impl PinInit<Self, kernel::error::Error> {
         pr_info!("PCI Driver probing {:?}\n", id_info);
 
         pdev.enable_device_mem()?;
@@ -173,14 +176,11 @@ impl pci::Driver for E1000Driver {
         let e1000_device = E1000Device::<Kernfn>::new(kfn, regs).unwrap();
 
         // Create the driver data structure
-        let drvdata = KBox::pin_init(
-            Self {
-                _pdev: pdev_aref,
-                _bar: bar_box,
-                inner: e1000_device,
-            },
-            GFP_KERNEL,
-        )?;
+        let drvdata = Self {
+            _pdev: pdev_aref,
+            _bar: bar_box,
+            inner: e1000_device,
+        };
 
         let wq = workqueue::system();
         wq.try_spawn(GFP_KERNEL, || {
