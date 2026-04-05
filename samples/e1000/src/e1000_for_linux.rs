@@ -14,7 +14,7 @@ use kernel::{
     sync::{Arc, ArcBorrow, CondVar, SpinLock, UniqueArc},
     types::ARef,
 };
-use kernel::{prelude::*, workqueue};
+use kernel::{io::Io, prelude::*, workqueue};
 
 #[macro_use]
 pub mod linux;

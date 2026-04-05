@@ -1,3 +1,0 @@
-# rinux-helper
-
-Attempt to 

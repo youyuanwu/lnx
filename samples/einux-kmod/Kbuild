@@ -1,8 +1,0 @@
-# SPDX-License-Identifier: GPL-2.0
-
-# Tell KBuild to build a module from pre-built object files
-obj-m := einux_kmod.o
-
-# Use pre-built object files (compiled by cargo in Makefile)
-# Object files are in the MO (module output) directory
-einux_kmod-objs := einux_kmod_main.o einux_vec.o
